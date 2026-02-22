@@ -1,5 +1,5 @@
 ﻿"use client";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const COURSES = ["All", "Engineering", "BIT", "BCA", "MCA", "Physics"];
 const SEMESTERS = [
@@ -289,15 +289,15 @@ function FilterDropdown({
         style={
           value !== "All"
             ? {
-                background: "#7c3aed",
-                color: "#fff",
-                boxShadow: "0 2px 8px rgba(124,58,237,0.25)",
-              }
+              background: "#7c3aed",
+              color: "#fff",
+              boxShadow: "0 2px 8px rgba(124,58,237,0.25)",
+            }
             : {
-                background: "#fff",
-                color: "#7c3aed",
-                border: "1.5px solid #ddd6fe",
-              }
+              background: "#fff",
+              color: "#7c3aed",
+              border: "1.5px solid #ddd6fe",
+            }
         }
       >
         <span className="truncate">{displayValue}</span>
@@ -616,10 +616,10 @@ export default function ResourcesPage() {
 
   return (
     <div
-      className="min-h-screen w-full flex justify-center"
+      className="h-full w-full flex justify-center overflow-y-auto"
       style={{ background: "#f3f4f6" }}
     >
-      <div className="w-full max-w-103 flex flex-col min-h-screen pb-28">
+      <div className="w-full max-w-103 flex flex-col pb-36">
         {/* Header */}
         <div
           className="sticky top-0 z-20 pt-6 pb-3 px-5"
@@ -759,56 +759,6 @@ export default function ResourcesPage() {
                   <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
                     {r.author} &middot; Sem {r.semester} &middot; {r.size}
                   </p>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: ts.bg,
-                        color: ts.text,
-                        border: `1px solid ${ts.border}`,
-                      }}
-                    >
-                      {r.type}
-                    </span>
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: "#f3f0ff",
-                        color: "#7c3aed",
-                        border: "1px solid #ddd6fe",
-                      }}
-                    >
-                      {r.subject}
-                    </span>
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: "#fdf4ff",
-                        color: "#c026d3",
-                        border: "1px solid #f0abfc",
-                      }}
-                    >
-                      {r.course}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: "#f3f0ff" }}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#7c3aed"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
                 </div>
               </button>
             );

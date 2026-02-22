@@ -15,14 +15,14 @@ function loadItems(): MarketItem[] {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) return JSON.parse(raw) as MarketItem[];
-  } catch {}
+  } catch { }
   return SEED_ITEMS;
 }
 
 function saveItems(items: MarketItem[]) {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(items));
-  } catch {}
+  } catch { }
 }
 
 // ── Seed data ────────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ const SEED_ITEMS: MarketItem[] = [
       "Classic instant film camera in mint condition. Great for aesthetic shots.",
     price: 1499,
     colorSeed: 0,
-    createdAt: Date.now() - 3000,
+    createdAt: 1713800000000,
     sellerName: "Ananya Mehta",
     condition: "Like New",
     location: "Pune, MH",
@@ -46,7 +46,7 @@ const SEED_ITEMS: MarketItem[] = [
       "Hand-poured soy wax candles with real lavender. Burns 40+ hrs each.",
     price: 599,
     colorSeed: 1,
-    createdAt: Date.now() - 2000,
+    createdAt: 1713800001000,
     sellerName: "Riya Kapoor",
     condition: "New",
     location: "Bengaluru, KA",
@@ -58,7 +58,7 @@ const SEED_ITEMS: MarketItem[] = [
       "75% layout, hot-swappable, clicky switches. Purple & pink keycaps.",
     price: 3299,
     colorSeed: 7,
-    createdAt: Date.now() - 1000,
+    createdAt: 1713800002000,
     sellerName: "Dev Sharma",
     condition: "Good",
     location: "Delhi, DL",
@@ -73,10 +73,16 @@ const genSeed = () => Math.floor(Math.random() * 8);
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function MarketPage() {
   const [role, setRole] = useState<Role>("buyer");
-  const [items, setItems] = useState<MarketItem[]>(() => loadItems());
+  const [items, setItems] = useState<MarketItem[]>(SEED_ITEMS);
   const [purchased, setPurchased] = useState<MarketItem[]>([]);
   // IDs listed during this session – shown with a "New" badge in buyer view
   const [newlyListed, setNewlyListed] = useState<Set<string>>(new Set());
+
+  // Load items from localStorage after initial hydration
+  useEffect(() => {
+    const storedItems = loadItems();
+    setItems(storedItems);
+  }, []);
 
   // Persist whenever items change
   useEffect(() => {
@@ -103,12 +109,12 @@ export default function MarketPage() {
   const visibleItems =
     role === "buyer" && search.trim()
       ? items.filter(
-          (it) =>
-            it.name.toLowerCase().includes(search.toLowerCase()) ||
-            it.description.toLowerCase().includes(search.toLowerCase()) ||
-            it.sellerName.toLowerCase().includes(search.toLowerCase()) ||
-            it.location.toLowerCase().includes(search.toLowerCase()),
-        )
+        (it) =>
+          it.name.toLowerCase().includes(search.toLowerCase()) ||
+          it.description.toLowerCase().includes(search.toLowerCase()) ||
+          it.sellerName.toLowerCase().includes(search.toLowerCase()) ||
+          it.location.toLowerCase().includes(search.toLowerCase()),
+      )
       : items;
 
   // ── Toast helper ─────────────────────────────────────────────────────────
