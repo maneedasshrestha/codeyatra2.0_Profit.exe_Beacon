@@ -1,5 +1,4 @@
-import BottomNavBar from "../components/BottomNav";
-import TopBar from "../components/TopBar";
+import TopBarAccount from "../components/TopBarAccount";
 
 export default function DashboardLayout({
   children,
@@ -8,9 +7,8 @@ export default function DashboardLayout({
 }>) {
   return (
     <>
-    <TopBar/>
+      <TopBarAccount />
       {children}
-      <BottomNavBar />
     </>
   );
 }

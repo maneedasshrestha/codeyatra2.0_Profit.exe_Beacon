@@ -1,19 +1,51 @@
-import { Bell } from "lucide-react";
+"use client";
+import { User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const TopBar = () => {
+  const router = useRouter();
+
+  const handleNavigate = () => {
+    router.push(`/account`);
+  };
+
   return (
-    <nav className="flex items-center justify-between px-6 py-4 bg-linear-to-r from-white via-gray-50 to-white shadow-lg mb-6 rounded-3xl">
-      <div className="flex items-center">
-        <span className="font-extrabold text-xl tracking-tight text-gray-900">
+    <nav
+      className="relative flex items-center justify-between px-6 py-4"
+      style={{ background: "#F8F7FA" }}
+    >
+      {/* Brand */}
+      <div className="flex flex-col leading-none">
+        <span
+          className="font-extrabold text-2xl tracking-tight"
+          style={{ color: "#3b0764" }}
+        >
           Beacon
         </span>
       </div>
+
+      {/* Account button */}
       <button
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-100 focus:outline-none transition-colors"
+        className="relative flex items-center justify-center w-10 h-10 rounded-full focus:outline-none transition-all"
+        style={{
+          background: "linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%)",
+          border: "1.5px solid #c4b5fd",
+          boxShadow: "0 2px 8px rgba(167,139,250,0.18)",
+        }}
         aria-label="Notifications"
+        onClick={() => handleNavigate()}
       >
-        <Bell className="h-5 w-5 text-gray-700" />
+        <User className="h-5 w-5" style={{ color: "#7c3aed" }} />
       </button>
+
+      {/* Bottom accent line */}
+      <div
+        className="absolute left-0 right-0 bottom-0 h-px"
+        style={{
+          background:
+            "linear-gradient(to right, transparent, #c4b5fd 30%, #a78bfa 50%, #c4b5fd 70%, transparent)",
+        }}
+      />
     </nav>
   );
 };
