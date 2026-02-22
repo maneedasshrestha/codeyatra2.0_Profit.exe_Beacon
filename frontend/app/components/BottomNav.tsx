@@ -7,7 +7,7 @@ const navItems = [
   { label: "Market", path: "/dashboard/market", icon: MarketIcon },
   { label: "New", path: "/dashboard/new", icon: PlusIcon },
   { label: "Chat", path: "/dashboard/chat", icon: ChatIcon },
-  { label: "Account", path: "/dashboard/account", icon: ProfileIcon },
+  { label: "Resources", path: "/dashboard/resources", icon: ResourcesIcon },
 ];
 
 export default function BottomNavBar() {
@@ -161,9 +161,23 @@ function ChatIcon() {
       <path
         stroke="currentColor"
         strokeWidth="1.8"
+        strokeLinecap="round"
         strokeLinejoin="round"
-        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z"
+        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
       />
+    </svg>
+  );
+}
+
+function ResourcesIcon() {
+  return (
+    <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
+      {/* bottom book */}
+      <rect x="3" y="16" width="18" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      {/* middle book */}
+      <rect x="4" y="11" width="16" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      {/* top book */}
+      <rect x="5" y="6" width="14" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
     </svg>
   );
 }
