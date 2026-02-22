@@ -7,7 +7,7 @@ const navItems = [
   { label: "Market", path: "/dashboard/market", icon: MarketIcon },
   { label: "New", path: "/dashboard/new", icon: PlusIcon },
   { label: "Chat", path: "/dashboard/chat", icon: ChatIcon },
-  { label: "Resources", path: "/dashboard/resources", icon: ResourcesIcon },
+  { label: "Resources", path: "/dashboard/resources", icon: ResourceIcon },
 ];
 
 export default function BottomNavBar() {
@@ -169,28 +169,24 @@ function ChatIcon() {
   );
 }
 
-function ResourcesIcon() {
+function ResourceIcon() {
   return (
     <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
-      {/* bottom book */}
-      <rect x="3" y="16" width="18" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      {/* middle book */}
-      <rect x="4" y="11" width="16" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      {/* top book */}
-      <rect x="5" y="6" width="14" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ProfileIcon() {
-  return (
-    <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
-      <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
-      <path
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        rx="2"
         stroke="currentColor"
         strokeWidth="1.8"
+        fill="none"
+      />
+      <path
+        d="M8 8h8M8 12h8M8 16h5"
+        stroke="currentColor"
+        strokeWidth="1.5"
         strokeLinecap="round"
-        d="M4.5 20c0-3.59 3.358-6.5 7.5-6.5s7.5 2.91 7.5 6.5"
       />
     </svg>
   );

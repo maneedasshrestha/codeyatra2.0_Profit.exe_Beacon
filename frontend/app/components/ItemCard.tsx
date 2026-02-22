@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { MarketItem, Role } from "./types";
+import { MarketItem, Role } from "../dashboard/market/components/types";
 
 const PALETTE = [
   ["#f3e8ff", "#c084fc"],
@@ -47,8 +47,10 @@ export default function ItemCard({
       style={{
         background: "#fff",
         border: "2px solid #ede9fe",
-        boxShadow: "0 4px 24px rgba(139,92,246,0.13), 0 1.5px 6px rgba(139,92,246,0.08)",
-        transition: "transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s",
+        boxShadow:
+          "0 4px 24px rgba(139,92,246,0.13), 0 1.5px 6px rgba(139,92,246,0.08)",
+        transition:
+          "transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s",
       }}
       onMouseEnter={(e) =>
         ((e.currentTarget as HTMLDivElement).style.transform = "scale(1.025)")
@@ -76,10 +78,20 @@ export default function ItemCard({
             boxShadow: `0 4px 16px ${accent}55`,
           }}
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ color: accent, opacity: 0.85 }}>
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 0 1-8 0"/>
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ color: accent, opacity: 0.85 }}
+          >
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
           </svg>
         </div>
         <div
@@ -106,7 +118,6 @@ export default function ItemCard({
             NEW
           </div>
         )}
-
       </div>
 
       {/* Content */}
@@ -145,8 +156,12 @@ export default function ItemCard({
               className="w-9 h-9 rounded-2xl flex items-center justify-center active:scale-90 transition-transform shrink-0"
               style={{
                 background: isWishlisted ? "#ede9fe" : "#f5f3ff",
-                border: isWishlisted ? "2px solid #c4b5fd" : "2px solid #ddd6fe",
-                boxShadow: isWishlisted ? "0 2px 10px rgba(139,92,246,0.18)" : "none",
+                border: isWishlisted
+                  ? "2px solid #c4b5fd"
+                  : "2px solid #ddd6fe",
+                boxShadow: isWishlisted
+                  ? "0 2px 10px rgba(139,92,246,0.18)"
+                  : "none",
                 transition: "background 0.18s, border 0.18s, box-shadow 0.18s",
               }}
             >
@@ -154,13 +169,13 @@ export default function ItemCard({
                 width="15"
                 height="15"
                 viewBox="0 0 24 24"
-              fill={isWishlisted ? "#7c3aed" : "none"}
-              stroke={isWishlisted ? "#7c3aed" : "#7c3aed"}
+                fill={isWishlisted ? "#7c3aed" : "none"}
+                stroke={isWishlisted ? "#7c3aed" : "#7c3aed"}
                 strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
             </button>
           </div>
