@@ -1,8 +1,7 @@
 import React from "react";
-import BottomNavBar from "./components/BottomNav";
 
 const HomePage = () => {
-  return <BottomNavBar />;
+  return <div>HomePage</div>;
 };
 
 export default HomePage;
