@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import postsRouter from "./routes/posts.routes.js";
+import { getFeed } from "./controllers/posts.controllers.js";
 
 const app = express();
 
@@ -14,6 +15,9 @@ app.get("/test", (req, res) => {
 });
 
 app.use("/api/posts", postsRouter);
+
+// Shorthand feed endpoint: GET /feed?college=X&semester=Y
+app.get("/feed", getFeed);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server running on port ${process.env.PORT || 3000}`);
