@@ -1,11 +1,58 @@
 import supabase from "../utils/supabase.js";
+import multer from "multer";
+
+// Multer config - store in memory buffer
+const storage = multer.memoryStorage();
+export const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
+
+// Helper: Upload image to Supabase bucket
+const uploadImageToBucket = async (file) => {
+  const fileExt = file.originalname.split(".").pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  const filePath = `listings/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from("marketplace")
+    .upload(filePath, file.buffer, {
+      contentType: file.mimetype,
+      upsert: false,
+    });
+
+  if (error) throw new Error(error.message);
+
+  const { data: urlData } = supabase.storage
+    .from("marketplace")
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
+};
 
 // POST /api/marketplace
 export const createListing = async (req, res) => {
-  const { user_id, title, description, price, category, condition, image_url, college } = req.body;
+  const { user_id, title, description, price, category, condition, college } = req.body;
 
   if (!user_id || !title || !price) {
     return res.status(400).json({ error: "user_id, title, and price are required" });
+  }
+
+  let image_url = null;
+
+  if (req.file) {
+    try {
+      image_url = await uploadImageToBucket(req.file);
+    } catch (err) {
+      return res.status(500).json({ error: "Image upload failed: " + err.message });
+    }
   }
 
   const { data, error } = await supabase
