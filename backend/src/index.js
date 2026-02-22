@@ -24,6 +24,6 @@ app.use("/api/posts", postsRouter);
 // Shorthand feed endpoint: GET /feed?college=X&semester=Y
 app.get("/feed", getFeed);
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server running on port ${process.env.PORT || 3000}`);
+app.listen(process.env.PORT || 5000, () => {
+  console.log(`Server running on port ${process.env.PORT || 5000}`);
 });

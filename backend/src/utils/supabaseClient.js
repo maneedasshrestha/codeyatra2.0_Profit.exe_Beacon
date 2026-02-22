@@ -3,7 +3,7 @@ import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@s
 export function createClient(context) {
   return createServerClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_PUBLISHABLE_KEY,
+    process.env.SUPABASE_KEY,
     {
       cookies: {
         getAll() {
