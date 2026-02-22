@@ -57,7 +57,6 @@ const TopBar = () => {
           style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}
           style={{
             background: "linear-gradient(135deg, #7c3aed, #a78bfa)",
-            boxShadow: "0 4px 14px rgba(124,58,237,0.35)",
           }}
           aria-label="Profile"
         >
