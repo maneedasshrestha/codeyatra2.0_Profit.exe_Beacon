@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { useState } from "react";
 import ChatList from "../../components/chat/ChatList";
 import ChatConversation from "../../components/chat/ChatConversation";
-import { CHATS_DATA, Chat } from "./mockData";
+import { CHATS_DATA } from "./mockData";
 
 const ChatPage = () => {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null); // Default to list view

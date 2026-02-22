@@ -1,8 +1,8 @@
 ﻿"use client";
 import { useState, useRef } from "react";
-import PostTypeSelector, { PostType } from "./components/PostTypeSelector";
-import { AttachedFile, AttachedLink } from "./components/AttachmentSection";
-import TagSelector from "./components/TagSelector";
+import PostTypeSelector, { PostType } from "../../components/PostTypeSelector";
+import { AttachedFile, AttachedLink } from "../../components/AttachmentSection";
+import TagSelector from "../../components/TagSelector";
 
 const USER = { name: "Rajesh Shrestha", batch: "c/2080-BCT", initials: "RS" };
 
