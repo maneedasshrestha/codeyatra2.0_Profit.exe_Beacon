@@ -46,6 +46,43 @@ export const getPosts = async (req, res) => {
   return res.status(200).json({ posts: data });
 };
 
+// GET /feed?college=X&semester=Y
+export const getFeed = async (req, res) => {
+  const { college, semester } = req.query;
+
+  let query = supabase
+    .from("posts")
+    .select(`
+      id,
+      user_id,
+      content,
+      college,
+      semester,
+      created_at,
+      upvotes(count)
+    `);
+
+  if (college) query = query.eq("college", college);
+  if (semester) query = query.eq("semester", semester);
+
+  const { data, error } = await query;
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Flatten upvote count then sort: upvotes DESC, created_at DESC
+  const posts = (data ?? [])
+    .map((post) => ({
+      ...post,
+      upvote_count: post.upvotes?.[0]?.count ?? 0,
+    }))
+    .sort((a, b) => {
+      if (b.upvote_count !== a.upvote_count) return b.upvote_count - a.upvote_count;
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+  return res.status(200).json({ posts });
+};
+
 // POST /posts/:id/upvote
 export const upvotePost = async (req, res) => {
   const { id: post_id } = req.params;
