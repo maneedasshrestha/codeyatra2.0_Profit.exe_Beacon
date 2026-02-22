@@ -1,6 +1,13 @@
-import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
+import {
+  createServerClient,
+  parseCookieHeader,
+  serializeCookieHeader,
+} from "@supabase/ssr";
 
 export function createClient(context) {
+  // Extract Authorization header if present (for Bearer tokens from Postman/API clients)
+  const authHeader = context.req.headers.authorization || "";
+
   return createServerClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_KEY,
@@ -17,6 +24,13 @@ export function createClient(context) {
             ),
           );
         },
+      },
+      global: {
+        headers: authHeader
+          ? {
+              Authorization: authHeader, // Forward Authorization header for Bearer tokens
+            }
+          : {},
       },
     },
   );
