@@ -1,51 +1,61 @@
 "use client";
-import { User } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const TopBar = () => {
   const router = useRouter();
 
-  const handleNavigate = () => {
-    router.push(`/account`);
-  };
-
   return (
     <nav
-      className="relative flex items-center justify-between px-6 py-4"
-      style={{ background: "#F8F7FA" }}
+      className="mx-3 mt-3 mb-4 px-4 py-3 rounded-3xl relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f3f0ff 0%, #faf5ff 40%, #ede9fe 100%)",
+        boxShadow: "0 4px 24px rgba(124,58,237,0.10), 0 1px 0 rgba(255,255,255,0.9) inset",
+        border: "1.5px solid rgba(196,181,253,0.45)",
+      }}
     >
-      {/* Brand */}
-      <div className="flex flex-col leading-none">
-        <span
-          className="font-extrabold text-2xl tracking-tight"
-          style={{ color: "#3b0764" }}
-        >
-          Beacon
-        </span>
-      </div>
-
-      {/* Account button */}
-      <button
-        className="relative flex items-center justify-center w-10 h-10 rounded-full focus:outline-none transition-all"
-        style={{
-          background: "linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%)",
-          border: "1.5px solid #c4b5fd",
-          boxShadow: "0 2px 8px rgba(167,139,250,0.18)",
-        }}
-        aria-label="Notifications"
-        onClick={() => handleNavigate()}
-      >
-        <User className="h-5 w-5" style={{ color: "#7c3aed" }} />
-      </button>
-
-      {/* Bottom accent line */}
+      {/* Subtle glow blob */}
       <div
-        className="absolute left-0 right-0 bottom-0 h-px"
-        style={{
-          background:
-            "linear-gradient(to right, transparent, #c4b5fd 30%, #a78bfa 50%, #c4b5fd 70%, transparent)",
-        }}
+        className="absolute -top-6 -right-6 w-28 h-28 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(167,139,250,0.22) 0%, transparent 70%)" }}
       />
+
+      <div className="flex items-center justify-between relative z-10">
+        {/* Left: logo + greeting */}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/assets/beacon-logo1.png"
+              alt="Beacon"
+              width={52}
+              height={52}
+              className="object-contain rounded-xl"
+              style={{ transform: "scale(3.5) translateX(-20px)", transformOrigin: "left center" }}
+              priority
+            />
+            <span
+              className="font-extrabold text-[22px] tracking-tight leading-none"
+              style={{
+                background: "linear-gradient(90deg, #6d28d9 0%, #a78bfa 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Beacon
+            </span>
+          </div>
+        </div>
+
+        {/* Right: avatar button */}
+        <button
+          onClick={() => router.push("/dashboard/account")}
+          className="relative flex items-center justify-center w-10 h-10 rounded-2xl"
+          style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)", WebkitTapHighlightColor: "transparent", outline: "none" }}
+          aria-label="Profile"
+        >
+          <span className="text-white font-extrabold text-[14px] tracking-wide">S</span>
+        </button>
+      </div>
     </nav>
   );
 };
