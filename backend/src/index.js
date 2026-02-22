@@ -1,9 +1,14 @@
 import "dotenv/config";
 import express from "express";
+import authroutes from "./routes/user-auth.route.js";
+import "dotenv/config";
 import postsRouter from "./routes/posts.routes.js";
 import { getFeed } from "./controllers/posts.controllers.js";
 
 const app = express();
+app.use(express.json());
+
+app.use("/auth", authroutes);
 
 app.use(express.json());
 
