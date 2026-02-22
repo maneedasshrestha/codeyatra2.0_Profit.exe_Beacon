@@ -1,0 +1,110 @@
+﻿"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { AuthBackground } from "@/app/setup/components/AuthBackground";
+import { AuthLogo } from "@/app/setup/components/AuthLogo";
+import { AuthCard } from "@/app/setup/components/AuthCard";
+import { ChipSelector } from "@/app/setup/components/ChipSelector";
+import { AuthInput } from "@/app/components/ui/AuthInput";
+import { AuthButton } from "@/app/components/ui/AuthButton";
+
+const COURSES = ["Engineering", "BIT", "BCA", "MCA", "Physics", "Other"];
+const SEMESTERS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+
+type Form = {
+  name: string; email: string; password: string; confirmPassword: string;
+  course: string; semester: string; college: string;
+};
+type Errors = Partial<Record<keyof Form, string>>;
+
+const UserIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+  </svg>
+);
+const MailIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2" /><polyline points="2,4 12,13 22,4" />
+  </svg>
+);
+const LockIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+const BuildingIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="15" rx="1" /><path d="M16 7V5a2 2 0 0 0-4 0v2" />
+  </svg>
+);
+
+export default function SignupPage() {
+  const router = useRouter();
+  const [form, setForm] = useState<Form>({
+    name: "", email: "", password: "", confirmPassword: "",
+    course: "", semester: "", college: "",
+  });
+  const [errors, setErrors] = useState<Errors>({});
+  const [loading, setLoading] = useState(false);
+
+  function onChange(field: string, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  }
+
+  function validate(): Errors {
+    const e: Errors = {};
+    if (!form.name.trim()) e.name = "Name is required";
+    if (!form.email.trim()) e.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Invalid email";
+    if (!form.password) e.password = "Password is required";
+    else if (form.password.length < 6) e.password = "At least 6 characters";
+    if (!form.confirmPassword) e.confirmPassword = "Please confirm your password";
+    else if (form.password !== form.confirmPassword) e.confirmPassword = "Passwords do not match";
+    if (!form.course) e.course = "Please select a course";
+    if (!form.semester) e.semester = "Please select a semester";
+    if (!form.college.trim()) e.college = "College name is required";
+    return e;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 1400));
+    router.push("/dashboard/home");
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-5 py-8">
+      <AuthBackground />
+      <div className="w-full max-w-[380px] flex flex-col gap-6">
+        <AuthLogo title="Create Account" />
+        <AuthCard>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <AuthInput label="Full Name" icon={<UserIcon />} type="text" placeholder="Your name"
+              value={form.name} onChange={(e) => onChange("name", e.target.value)} error={errors.name} autoComplete="name" />
+            <AuthInput label="Email" icon={<MailIcon />} type="email" placeholder="you@campus.edu"
+              value={form.email} onChange={(e) => onChange("email", e.target.value)} error={errors.email} autoComplete="email" />
+            <AuthInput label="Password" icon={<LockIcon />} type="password" placeholder=""
+              value={form.password} onChange={(e) => onChange("password", e.target.value)} error={errors.password} autoComplete="new-password" />
+            <AuthInput label="Confirm Password" icon={<LockIcon />} type="password" placeholder=""
+              value={form.confirmPassword} onChange={(e) => onChange("confirmPassword", e.target.value)} error={errors.confirmPassword} autoComplete="new-password" />
+            <ChipSelector label="Course" options={COURSES} value={form.course} error={errors.course} onChange={(val) => onChange("course", val)} />
+            <ChipSelector label="Semester" options={SEMESTERS} value={form.semester} error={errors.semester} onChange={(val) => onChange("semester", val)} />
+            <AuthInput label="College Name" icon={<BuildingIcon />} type="text" placeholder="Your college"
+              value={form.college} onChange={(e) => onChange("college", e.target.value)} error={errors.college} />
+            <AuthButton loading={loading} type="submit">Create Account</AuthButton>
+          </form>
+        </AuthCard>
+        <p className="text-center text-[13px]" style={{ color: "#9ca3af" }}>
+          Already have an account?{" "}
+          <Link href="/setup/login" className="font-bold" style={{ color: "#7c3aed" }}>Sign in</Link>
+        </p>
+      </div>
+    </div>
+  );
+}
