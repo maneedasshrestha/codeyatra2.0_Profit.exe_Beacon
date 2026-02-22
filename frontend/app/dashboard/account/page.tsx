@@ -1,103 +1,122 @@
+"use client";
 import React from "react";
-import {
-  ChevronLeft,
-  Settings,
-  Bookmark,
-  MessageSquare,
-  Users,
-  LogOut,
-} from "lucide-react";
-import Image from "next/image";
+import ProfileHeader from "./components/ProfileHeader";
+import AcademicCard from "./components/AcademicCard";
+import ActionMenu from "./components/ActionMenu";
 
-const AccountPage = () => {
+const USER = {
+  name: "Sizzler Sahikarmi",
+  email: "sizzler@ioe.edu.np",
+  year: "1st Year",
+  initials: "SS",
+  imgSrc: "/assets/profile_picture.jpg",
+};
+
+const CREDENTIALS = [
+  { label: "College", value: "Pulchowk Campus" },
+  { label: "Stream", value: "BCT - Computer Eng." },
+  { label: "Batch", value: "2080" },
+  { label: "Semester", value: "1st Sem" },
+];
+
+const STATS = [
+  { label: "Questions Replied", value: 12 },
+  { label: "Questions Asked", value: 4 },
+];
+
+export default function AccountPage() {
   return (
-    <div className="min-h-dvh bg-[#F9FAFB] flex flex-col items-center w-full">
-      {/* Profile Header Section */}
-      <div className="flex flex-col items-center mt-16 mb-6">
-        <div className="relative">
-          <span className="block rounded-full border-4 border-[#BDB2FF] p-1">
-            <Image
-              src="/assets/profile_picture.jpg"
-              alt="Profile Picture"
-              width={96}
-              height={96}
-              className="rounded-full object-cover"
-            />
+    <div className="min-h-screen w-full flex justify-center" style={{ background: "#f3f4f6" }}>
+      <div className="w-full max-w-[412px] flex flex-col min-h-screen pb-28">
+
+        {/* ── Header ──────────────────────────────────────────────────────── */}
+        <div
+          className="sticky top-0 z-20 pt-6 pb-4 px-5"
+          style={{
+            background: "linear-gradient(180deg,#f3f4f6 70%,#f3f4f6cc 100%)",
+            backdropFilter: "blur(20px)",
+          }}
+        >
+          <span
+            className="text-[11px] font-bold tracking-widest uppercase"
+            style={{ color: "#a78bfa", letterSpacing: "0.12em" }}
+          >
+            Your Profile
           </span>
+          <h1 className="text-3xl font-extrabold leading-none text-violet-900">
+            Account
+          </h1>
         </div>
-        <div className="mt-3 text-2xl font-bold text-gray-900">
-          Sizzler Sahikarmi
-        </div>
-        <div className="text-sm text-gray-500">sizzler@ioe.edu.np</div>
-        <div className="mt-2">
-          <span className="px-3 py-1 rounded-full bg-[#F3F0FF] text-[#BDB2FF] text-xs font-semibold">
-            1st Year
-          </span>
-        </div>
-      </div>
 
-      {/* Academic Credentials Card */}
-      <div className="w-[90%] max-w-sm bg-white rounded-2xl shadow-sm border border-[#F3F0FF] mb-6">
-        <div className="px-5 pt-4 pb-2 text-xs text-gray-400 font-semibold">
-          Academic Profile
+        {/* ── Profile card ────────────────────────────────────────────────── */}
+        <div
+          className="mx-4 rounded-2xl overflow-hidden"
+          style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}
+        >
+          <ProfileHeader
+            name={USER.name}
+            email={USER.email}
+            year={USER.year}
+            initials={USER.initials}
+            imgSrc={USER.imgSrc}
+          />
         </div>
-        <div className="grid grid-cols-2 grid-rows-2 gap-x-4 gap-y-2 px-5 pb-4">
-          <div>
-            <div className="text-xs text-gray-400">College</div>
-            <div className="font-bold text-gray-900">Pulchowk Campus</div>
-          </div>
-          <div>
-            <div className="text-xs text-gray-400">Stream</div>
-            <div className="font-bold text-gray-900">BCT - Computer Eng.</div>
-          </div>
-          <div>
-            <div className="text-xs text-gray-400">Batch</div>
-            <div className="font-bold text-gray-900">2080</div>
-          </div>
-          <div>
-            <div className="text-xs text-gray-400">Semester</div>
-            <div className="font-bold text-gray-900">1st Sem</div>
-          </div>
-        </div>
-      </div>
 
-      {/* App Stats Row */}
-      <div className="w-[90%] max-w-sm flex justify-between items-center mb-6">
-        <div className="flex-1 flex flex-col items-center">
-          <div className="font-bold text-lg text-gray-900">12</div>
-          <div className="text-[11px] text-gray-400">Questions Replied</div>
+        {/* ── Stats row ───────────────────────────────────────────────────── */}
+        <div
+          className="mx-4 mt-4 rounded-2xl flex items-center"
+          style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}
+        >
+          {STATS.map((stat, i) => (
+            <React.Fragment key={stat.label}>
+              {i > 0 && <div className="w-px self-stretch my-3" style={{ background: "#ede9fe" }} />}
+              <div className="flex-1 flex flex-col items-center py-5">
+                <span className="text-2xl font-extrabold text-violet-900">{stat.value}</span>
+                <span className="text-[11px] font-medium text-gray-400 mt-0.5">{stat.label}</span>
+              </div>
+            </React.Fragment>
+          ))}
         </div>
-        <div className="w-px h-8 bg-gray-200 mx-2" />
-        <div className="flex-1 flex flex-col items-center">
-          <div className="font-bold text-lg text-gray-900">4</div>
-          <div className="text-[11px] text-gray-400">Questions Asked</div>
+
+        {/* ── Academic card ───────────────────────────────────────────────── */}
+        <div className="mt-4">
+          <AcademicCard credentials={CREDENTIALS} />
         </div>
-      </div>
 
-      {/* Action Menu */}
-      <div className="w-[90%] max-w-sm bg-white rounded-2xl shadow-sm divide-y divide-gray-100 mb-8">
-        <button className="w-full flex items-center px-5 py-4 text-left hover:bg-[#F3F0FF]">
-          <Bookmark className="w-5 h-5 text-[#BDB2FF] mr-4" />
-          <span className="flex-1 text-gray-900 font-medium">
-            Saved Resources
-          </span>
-          <ChevronLeft className="w-5 h-5 text-gray-300 rotate-180" />
-        </button>
-        <button className="w-full flex items-center px-5 py-4 text-left hover:bg-[#F3F0FF]">
-          <MessageSquare className="w-5 h-5 text-[#BDB2FF] mr-4" />
-          <span className="flex-1 text-gray-900 font-medium">My Threads</span>
-          <ChevronLeft className="w-5 h-5 text-gray-300 rotate-180" />
-        </button>
+        {/* ── Actions menu ────────────────────────────────────────────────── */}
+        <div className="mt-4">
+          <ActionMenu
+            items={[
+              {
+                label: "Saved Resources",
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                ),
+              },
+              {
+                label: "My Threads",
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                ),
+              },
+              {
+                label: "Sign Out",
+                danger: true,
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                ),
+              },
+            ]}
+          />
+        </div>
 
-        <div className="h-px bg-gray-100 mx-5" />
-        <button className="w-full flex items-center px-5 py-4 text-left hover:bg-[#F9FAFB]">
-          <LogOut className="w-5 h-5 text-red-400 mr-4" />
-          <span className="flex-1 text-gray-900 font-medium">Sign Out</span>
-          <ChevronLeft className="w-5 h-5 text-gray-300 rotate-180" />
-        </button>
       </div>
     </div>
   );
-};
-
-export default AccountPage;
+}
