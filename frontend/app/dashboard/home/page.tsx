@@ -35,6 +35,7 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col h-dvh bg-[#F8F7FA] overflow-hidden">
+      <TopBar />
       <div className="sticky top-0 z-20 bg-[#F8F7FA]/80 backdrop-blur-2xl">
         <FilterPills />
         <div className="h-px bg-linear-to-r from-transparent via-violet-100 to-transparent mx-4" />
