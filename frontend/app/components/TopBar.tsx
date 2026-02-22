@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const TopBar = () => {
@@ -22,23 +23,18 @@ const TopBar = () => {
       <div className="flex items-center justify-between relative z-10">
         {/* Left: logo + greeting */}
         <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-2" style={{ paddingBottom: 2 }}>
-            {/* Beacon orb icon */}
-            <div
-              className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0"
-              style={{
-                background: "linear-gradient(135deg, #7c3aed, #a78bfa)",
-                boxShadow: "0 2px 10px rgba(124,58,237,0.35)",
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="3" fill="white" />
-                <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                <path d="M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/assets/beacon-logo1.png"
+              alt="Beacon"
+              width={52}
+              height={52}
+              className="object-contain rounded-xl"
+              style={{ transform: "scale(3.5) translateX(-20px)", transformOrigin: "left center" }}
+              priority
+            />
             <span
-              className="font-extrabold text-[20px] tracking-tight leading-none"
+              className="font-extrabold text-[22px] tracking-tight leading-none"
               style={{
                 background: "linear-gradient(90deg, #6d28d9 0%, #a78bfa 100%)",
                 WebkitBackgroundClip: "text",
@@ -54,10 +50,7 @@ const TopBar = () => {
         <button
           onClick={() => router.push("/dashboard/account")}
           className="relative flex items-center justify-center w-10 h-10 rounded-2xl"
-          style={{ WebkitTapHighlightColor: "transparent", outline: "none" }}
-          style={{
-            background: "linear-gradient(135deg, #7c3aed, #a78bfa)",
-          }}
+          style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)", WebkitTapHighlightColor: "transparent", outline: "none" }}
           aria-label="Profile"
         >
           <span className="text-white font-extrabold text-[14px] tracking-wide">S</span>
