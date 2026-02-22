@@ -1,4 +1,4 @@
-import TopBarAccount from "../components/TopBarAccount";
+import TopBarAccount from "@/app/components/TopBarAccount";
 
 export default function DashboardLayout({
   children,

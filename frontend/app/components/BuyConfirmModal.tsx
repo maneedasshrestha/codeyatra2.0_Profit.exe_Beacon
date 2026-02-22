@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { MarketItem } from "./types";
+import { MarketItem } from "../dashboard/market/components/types";
 
 interface BuyConfirmModalProps {
   item: MarketItem | null;
@@ -50,10 +50,19 @@ export default function BuyConfirmModal({
               boxShadow: "0 4px 20px rgba(139,92,246,0.2)",
             }}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 0 1-8 0"/>
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#7c3aed"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
           </div>
         </div>
@@ -82,7 +91,11 @@ export default function BuyConfirmModal({
           <button
             onClick={onClose}
             className="flex-1 py-3 rounded-2xl font-bold text-sm border-2 active:scale-95 transition-transform"
-            style={{ borderColor: "#ddd6fe", color: "#7c3aed", background: "#faf5ff" }}
+            style={{
+              borderColor: "#ddd6fe",
+              color: "#7c3aed",
+              background: "#faf5ff",
+            }}
           >
             Cancel
           </button>

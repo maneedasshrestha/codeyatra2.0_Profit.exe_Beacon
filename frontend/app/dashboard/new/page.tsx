@@ -1,8 +1,8 @@
 ﻿"use client";
 import { useState, useRef } from "react";
-import PostTypeSelector, { PostType } from "../../components/PostTypeSelector";
-import { AttachedFile, AttachedLink } from "../../components/AttachmentSection";
-import TagSelector from "../../components/TagSelector";
+import PostTypeSelector, { PostType } from "./components/PostTypeSelector";
+import { AttachedFile, AttachedLink } from "./components/AttachmentSection";
+import TagSelector from "./components/TagSelector";
 
 const USER = { name: "Rajesh Shrestha", batch: "c/2080-BCT", initials: "RS" };
 
@@ -136,7 +136,7 @@ export default function NewPostPage() {
       className="min-h-screen w-full flex justify-center"
       style={{ background: "#f3f4f6" }}
     >
-      <div className="w-full max-w-[412px] flex flex-col min-h-screen pb-28">
+      <div className="w-full max-w-103 flex flex-col min-h-screen pb-28">
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div
           className="sticky top-0 z-20 pt-6 pb-4 px-5"

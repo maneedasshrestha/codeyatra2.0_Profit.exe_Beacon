@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import ProfileHeader from "../components/ProfileHeader";
-import AcademicCard from "../components/AcademicCard";
-import ActionMenu from "../components/ActionMenu";
+import ProfileHeader from "./components/ProfileHeader";
+import AcademicCard from "./components/AcademicCard";
+import ActionMenu from "./components/ActionMenu";
 
 const USER = {
   name: "Sizzler Sahikarmi",
