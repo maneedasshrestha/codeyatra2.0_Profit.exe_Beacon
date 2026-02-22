@@ -34,8 +34,8 @@ export default function BottomNavBar() {
                 key={item.path}
                 onClick={() => router.push(item.path)}
                 className="relative mx-1 sm:mx-2 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl
-                  bg-linear-to-br from-blue-500 to-indigo-600
-                  shadow-[0_4px_24px_rgba(99,102,241,0.6)]
+                  bg-linear-to-br from-violet-400 to-violet-600
+                  shadow-[0_4px_24px_rgba(139,92,246,0.5)]
                   active:scale-95 transition-transform duration-100"
               >
                 <motion.div
@@ -58,7 +58,7 @@ export default function BottomNavBar() {
               {active && (
                 <motion.div
                   layoutId="active-bg"
-                  className="absolute inset-0 rounded-2xl bg-black/6"
+                  className="absolute inset-0 rounded-2xl bg-violet-100"
                   transition={{ type: "spring", stiffness: 450, damping: 35 }}
                 />
               )}
@@ -67,7 +67,7 @@ export default function BottomNavBar() {
                 animate={{ scale: active ? 1.08 : 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 className={`relative z-10 transition-colors duration-150
-                  ${active ? "text-neutral-900" : "text-neutral-400 group-hover:text-neutral-600"}`}
+                  ${active ? "text-violet-500" : "text-neutral-400 group-hover:text-neutral-600"}`}
               >
                 <Icon />
               </motion.div>
@@ -81,7 +81,7 @@ export default function BottomNavBar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 5 }}
                       transition={{ duration: 0.15 }}
-                      className="text-[10px] font-semibold tracking-wide text-neutral-900 leading-none whitespace-nowrap"
+                      className="text-[10px] font-semibold tracking-wide text-violet-500 leading-none whitespace-nowrap"
                     >
                       {item.label}
                     </motion.span>
@@ -100,7 +100,7 @@ export default function BottomNavBar() {
 
 function HomeIcon() {
   return (
-    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24">
+    <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
       <path
         stroke="currentColor"
         strokeWidth="1.8"
@@ -111,106 +111,32 @@ function HomeIcon() {
   );
 }
 
-/* Candlestick chart — accurate for a financial market */
 function MarketIcon() {
   return (
-    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24">
-      {/* Left candle — bearish (down day) */}
-      <line
-        x1="6"
-        y1="4"
-        x2="6"
-        y2="7"
+    <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
+      ={" "}
+      <path
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.8"
         strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 9h18M3 9l1.5-4h15L21 9M3 9c0 1.1.9 2 2 2s2-.9 2-2c0 1.1.9 2 2 2s2-.9 2-2c0 1.1.9 2 2 2s2-.9 2-2c0 1.1.9 2 2 2s2-.9 2-2"
       />
-      <rect
-        x="4.25"
-        y="7"
-        width="3.5"
-        height="6"
-        rx="0.75"
+      ={" "}
+      <path
         stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <line
-        x1="6"
-        y1="13"
-        x2="6"
-        y2="16"
-        stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.8"
         strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"
       />
-
-      {/* Middle candle — bullish (up day) */}
-      <line
-        x1="12"
-        y1="3"
-        x2="12"
-        y2="5"
+      ={" "}
+      <path
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.8"
         strokeLinecap="round"
-      />
-      <rect
-        x="10.25"
-        y="5"
-        width="3.5"
-        height="9"
-        rx="0.75"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <line
-        x1="12"
-        y1="14"
-        x2="12"
-        y2="17"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-
-      {/* Right candle — small bullish */}
-      <line
-        x1="18"
-        y1="6"
-        x2="18"
-        y2="9"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <rect
-        x="16.25"
-        y="9"
-        width="3.5"
-        height="5"
-        rx="0.75"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <line
-        x1="18"
-        y1="14"
-        x2="18"
-        y2="17"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-
-      {/* Baseline */}
-      <line
-        x1="3"
-        y1="20.5"
-        x2="21"
-        y2="20.5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 20v-5a2 2 0 0 1 4 0v5"
       />
     </svg>
   );
@@ -218,7 +144,7 @@ function MarketIcon() {
 
 function PlusIcon() {
   return (
-    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24">
+    <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
       <path
         stroke="white"
         strokeWidth="2"
@@ -231,7 +157,7 @@ function PlusIcon() {
 
 function ChatIcon() {
   return (
-    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24">
+    <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
       <path
         stroke="currentColor"
         strokeWidth="1.8"
@@ -242,7 +168,6 @@ function ChatIcon() {
   );
 }
 
-/* Person silhouette — circle head + shoulder arc */
 function ProfileIcon() {
   return (
     <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24">
