@@ -286,21 +286,26 @@ export default function NewPostPage() {
 
           {/* Inline link input */}
           {showLinkInput && (
-            <div className="px-4 pb-3 flex gap-2">
+            <div className="px-4 pb-3 flex gap-2 items-center">
               <input
                 autoFocus
                 type="url"
-                placeholder="Paste link hereâ€¦"
+                placeholder="Paste link here…"
                 value={linkDraft}
                 onChange={(e) => setLinkDraft(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddLink()}
-                className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
                 style={{ background: "#f3f4f6", border: "1px solid #e5e7eb", color: "#111827" }}
                 onFocus={(e) => (e.target.style.borderColor = "#7c3aed")}
                 onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
               />
-              <button onClick={handleAddLink} className="px-3 py-2 rounded-xl text-sm font-semibold text-white" style={{ background: "#7c3aed" }}>Add</button>
-              <button onClick={() => { setShowLinkInput(false); setLinkDraft(""); }} className="px-2 py-2 rounded-xl text-sm text-gray-400">âœ•</button>
+              <button
+                onClick={handleAddLink}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white shrink-0"
+                style={{ background: "#7c3aed" }}
+              >
+                Add
+              </button>
             </div>
           )}
 
