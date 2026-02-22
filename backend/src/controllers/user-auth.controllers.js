@@ -171,24 +171,29 @@ export const completeProfile = async (req, res) => {
   // Upsert user profile (creates if doesn't exist, updates if exists)
   const { data, error } = await supabase
     .from("users")
-    .upsert({
-      id: user.id,
-      email: user.email,
-      name,
-      college,
-      stream,
-      semester,
-      role,
-      profile_completed: true,
-      updated_at: new Date().toISOString(),
-    }, {
-      onConflict: 'id'
-    })
+    .upsert(
+      {
+        id: user.id,
+        email: user.email,
+        name,
+        college,
+        stream,
+        semester,
+        role,
+        profile_completed: true,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "id",
+      },
+    )
     .select();
 
   if (error) {
     console.error("Profile update error:", error);
-    return res.status(500).json({ error: "Failed to update profile", details: error });
+    return res
+      .status(500)
+      .json({ error: "Failed to update profile", details: error });
   }
 
   res.status(200).json({
