@@ -8,15 +8,26 @@ interface AvatarProps {
 const Avatar: React.FC<AvatarProps> = ({ initials, size = "md" }) => {
   const dim =
     size === "lg"
-      ? "w-12 h-12 text-[15px]"
+      ? "w-14 h-14 text-[16px]"
       : size === "md"
-        ? "w-9 h-9 text-[13px]"
-        : "w-7 h-7 text-[11px]";
+        ? "w-10 h-10 text-[14px]"
+        : "w-8 h-8 text-[12px]";
+
+  // Use initials to determine a "unique" premium gradient
+  const gradients = [
+    "bg-gradient-to-br from-violet-400 to-violet-600",
+    "bg-gradient-to-br from-indigo-400 to-indigo-600",
+    "bg-gradient-to-br from-fuchsia-400 to-fuchsia-600",
+    "bg-gradient-to-br from-purple-400 to-purple-600",
+  ];
+  const charCode = initials.charCodeAt(0) || 0;
+  const gradient = gradients[charCode % gradients.length];
+
   return (
     <div
-      className={`${dim} rounded-full bg-blue-400 flex items-center justify-center shrink-0 shadow-sm`}
+      className={`${dim} rounded-2xl ${gradient} flex items-center justify-center shrink-0 shadow-[0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.2)] border border-white/20`}
     >
-      <span className="font-bold text-white tracking-tight">{initials}</span>
+      <span className="font-extrabold text-white tracking-tight drop-shadow-sm uppercase">{initials}</span>
     </div>
   );
 };

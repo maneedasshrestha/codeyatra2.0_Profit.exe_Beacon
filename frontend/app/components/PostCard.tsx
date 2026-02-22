@@ -26,64 +26,54 @@ const PostCard: React.FC<PostCardProps> = ({
   return (
     <article
       onClick={() => onNavigate(post.id)}
-      className="bg-white mx-4 rounded-3xl shadow-sm border border-gray-100/80 cursor-pointer active:scale-[0.985] transition-all duration-150 overflow-hidden"
+      className="bg-white mx-4 rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-black/5 cursor-pointer active:scale-[0.99] transition-all duration-200 overflow-hidden hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] group"
     >
-      <div className="px-4 pt-4 pb-3">
+      <div className="px-5 pt-5 pb-4">
         {/* Author Row */}
-        <div className="flex items-center gap-2.5 mb-3">
-          <Avatar initials={post.authorInitials} />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="relative">
+            <Avatar initials={post.authorInitials} />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[13px] font-bold text-gray-900 truncate">
+              <span className="text-[14px] font-bold text-gray-900 group-hover:text-violet-600 transition-colors">
                 {post.author}
               </span>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[11px] font-semibold text-gray-400  ">
+              <span className="text-[12px] font-semibold text-violet-500/80 bg-violet-50 px-2 py-0.5 rounded-lg">
                 {post.community}
               </span>
               <span className="text-gray-300 text-[10px]">·</span>
-              <span className="text-[11px] text-gray-400">{post.timeAgo}</span>
+              <span className="text-[12px] text-gray-400 font-medium">
+                {post.timeAgo}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Title */}
-        <h2 className="text-[15px] font-bold text-gray-900 leading-snug">
+        <h2 className="text-[17px] font-bold text-gray-900 leading-tight tracking-tight mb-2">
           {post.title}
         </h2>
 
         {/* Body */}
-        <p className="mt-1.5 text-[13px] text-gray-500 leading-relaxed line-clamp-2">
+        <p className="text-[14px] text-gray-500 leading-relaxed line-clamp-2 font-medium opacity-90">
           {post.body}
         </p>
-
-        {/* Tags */}
-        <div className="flex gap-1.5 mt-2.5 flex-wrap">
-          {post.tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-500"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
       </div>
 
-      {/* Divider */}
-      <div className="mx-4 border-t border-gray-50" />
-
       {/* Action Bar */}
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div className="flex items-center gap-4 px-5 py-4 bg-gray-50/30 border-t border-gray-50/50">
         {/* Vote Pill */}
         <div
-          className={`flex items-center rounded-xl overflow-hidden border transition-colors ${
+          className={`flex items-center rounded-2xl overflow-hidden border transition-all duration-300 ${
             post.userVote === "up"
-              ? "border-purple-200 bg-purple-50"
+              ? "border-violet-200 bg-violet-100/50 shadow-[0_2px_10px_rgba(139,92,246,0.1)]"
               : post.userVote === "down"
                 ? "border-orange-200 bg-orange-50"
-                : "border-gray-100 bg-gray-50"
+                : "border-gray-200/50 bg-white"
           }`}
         >
           <button
@@ -91,23 +81,22 @@ const PostCard: React.FC<PostCardProps> = ({
               e.stopPropagation();
               onVote(post.id, "up");
             }}
-            className="p-2 active:opacity-60 transition-opacity"
+            className={`p-2.5 transition-all ${
+              post.userVote === "up"
+                ? "bg-violet-500 text-white"
+                : "hover:bg-violet-50 text-gray-400 hover:text-violet-500"
+            }`}
             aria-label="Upvote"
           >
-            <ChevronUp
-              size={16}
-              className={
-                post.userVote === "up" ? "text-purple-500" : "text-gray-400"
-              }
-            />
+            <ChevronUp size={18} />
           </button>
           <span
-            className={`text-[13px] font-black tabular-nums px-0.5 ${
+            className={`text-[14px] font-bold tabular-nums px-2 ${
               post.userVote === "up"
-                ? "text-purple-500"
+                ? "text-violet-600"
                 : post.userVote === "down"
-                  ? "text-orange-400"
-                  : "text-gray-600"
+                  ? "text-orange-500"
+                  : "text-gray-700"
             }`}
           >
             {voteCount}
@@ -117,15 +106,14 @@ const PostCard: React.FC<PostCardProps> = ({
               e.stopPropagation();
               onVote(post.id, "down");
             }}
-            className="p-2 active:opacity-60 transition-opacity"
+            className={`p-2.5 transition-all ${
+              post.userVote === "down"
+                ? "bg-orange-500 text-white"
+                : "hover:bg-orange-50 text-gray-400 hover:text-orange-500"
+            }`}
             aria-label="Downvote"
           >
-            <ChevronDown
-              size={16}
-              className={
-                post.userVote === "down" ? "text-orange-400" : "text-gray-400"
-              }
-            />
+            <ChevronDown size={18} />
           </button>
         </div>
 
@@ -135,11 +123,14 @@ const PostCard: React.FC<PostCardProps> = ({
             e.stopPropagation();
             onNavigate(post.id);
           }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-50 border border-gray-100 active:opacity-60 transition-opacity"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border border-gray-200/50 hover:border-violet-200 hover:bg-violet-50/30 transition-all group/btn"
           aria-label="Comments"
         >
-          <MessageCircle size={14} className="text-gray-400" />
-          <span className="text-[13px] font-bold text-gray-500">
+          <MessageCircle
+            size={16}
+            className="text-gray-400 group-hover/btn:text-violet-500 transition-colors"
+          />
+          <span className="text-[14px] font-bold text-gray-600 group-hover/btn:text-violet-600">
             {post.comments}
           </span>
         </button>
@@ -150,14 +141,14 @@ const PostCard: React.FC<PostCardProps> = ({
             e.stopPropagation();
             onSave(post.id);
           }}
-          className={`p-2 rounded-xl border transition-all active:scale-90 ${
+          className={`ml-auto p-2.5 rounded-2xl border transition-all active:scale-90 ${
             post.saved
-              ? "bg-purple-50 border-purple-200 text-purple-500"
-              : "bg-gray-50 border-gray-100 text-gray-400"
+              ? "bg-violet-500 border-violet-500 text-white shadow-[0_4px_12px_rgba(139,92,246,0.3)]"
+              : "bg-white border-gray-200/50 text-gray-400 hover:border-violet-200 hover:text-violet-500"
           }`}
           aria-label="Save"
         >
-          <Bookmark size={14} className={post.saved ? "fill-purple-400" : ""} />
+          <Bookmark size={16} className={post.saved ? "fill-white" : ""} />
         </button>
       </div>
     </article>
