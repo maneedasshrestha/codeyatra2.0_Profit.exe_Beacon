@@ -46,7 +46,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
   return (
     <div className="flex gap-4 px-5 py-5 bg-white rounded-[1.5rem] border border-black/5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all group">
       <div className="relative shrink-0">
-        <Avatar initials={initials} />
+        <Avatar initials={initials} imgSrc={comment.user_avatar ?? undefined} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
