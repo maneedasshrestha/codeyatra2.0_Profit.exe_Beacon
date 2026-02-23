@@ -10,7 +10,7 @@ import {
 /** Convert a backend ApiListing into the frontend MarketItem shape */
 export function apiListingToMarketItem(
   listing: ApiListing,
-  sellerName = "Unknown"
+  sellerName?: string
 ): MarketItem {
   return {
     id: listing.id,
@@ -21,7 +21,7 @@ export function apiListingToMarketItem(
     createdAt: listing.created_at
       ? new Date(listing.created_at).getTime()
       : Date.now(),
-    sellerName,
+    sellerName: sellerName ?? listing.seller_name ?? "Unknown",
     condition: (listing.condition as Condition) ?? "Good",
     location: listing.college ?? "",
     image_url: listing.image_url,

@@ -19,6 +19,7 @@ export interface ApiListing {
   image_url: string | null;
   college: string | null;
   created_at: string;
+  seller_name?: string | null;
 }
 
 export interface GetListingsParams {

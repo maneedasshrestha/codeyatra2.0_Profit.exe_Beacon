@@ -99,7 +99,23 @@ export const getAllListings = async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  return res.status(200).json({ listings: data });
+  // Enrich listings with seller names from the users table
+  const userIds = [...new Set((data || []).map((l) => l.user_id).filter(Boolean))];
+  let sellerMap = {};
+  if (userIds.length > 0) {
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, name")
+      .in("id", userIds);
+    (users || []).forEach((u) => { sellerMap[u.id] = u.name; });
+  }
+
+  const listings = (data || []).map((l) => ({
+    ...l,
+    seller_name: sellerMap[l.user_id] || null,
+  }));
+
+  return res.status(200).json({ listings });
 };
 
 // DELETE /api/marketplace/:id — only the listing owner can delete
@@ -164,5 +180,16 @@ export const getListingById = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  return res.status(200).json({ listing: data });
+  // Enrich with seller name
+  let seller_name = null;
+  if (data?.user_id) {
+    const { data: user } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", data.user_id)
+      .single();
+    seller_name = user?.name ?? null;
+  }
+
+  return res.status(200).json({ listing: { ...data, seller_name } });
 };
