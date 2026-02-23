@@ -144,24 +144,31 @@ const ChatList: React.FC<ChatListProps> = ({
                     <>
                         <div className="px-6 mb-2 mt-2">
                             <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest opacity-70">
-                                {isSearching ? "Conversations" : "Recent"}
+                                {hasQuery ? "Conversations" : "Recent"}
                             </span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            {filteredNormalChats.map((chat) => (
-                                <ChatTile
-                                    key={chat.id}
-                                    name={chat.name}
-                                    initials={chat.initials}
-                                    lastMessage={chat.lastMessage}
-                                    time={chat.time}
-                                    unread={chat.unread}
-                                    online={chat.online}
-                                    active={selectedChatId === chat.id}
-                                    onClick={() => onSelectChat(chat.id)}
-                                />
-                            ))}
-                        </div>
+                        {filteredNormalChats.length > 0 ? (
+                            <div className="flex flex-col gap-1">
+                                {filteredNormalChats.map((chat) => (
+                                    <ChatTile
+                                        key={chat.id}
+                                        name={chat.name}
+                                        initials={chat.initials}
+                                        lastMessage={chat.lastMessage}
+                                        time={chat.time}
+                                        unread={chat.unread}
+                                        online={chat.online}
+                                        active={selectedChatId === chat.id}
+                                        onClick={() => onSelectChat(chat.id)}
+                                    />
+                                ))}
+                            </div>
+                        ) : !hasQuery && (
+                            <div className="flex flex-col items-center justify-center px-6 py-8 text-center">
+                                <p className="text-[14px] font-semibold text-gray-400">No conversations yet</p>
+                                <p className="text-[12px] font-medium text-gray-300 mt-1">Search for someone above to start chatting.</p>
+                            </div>
+                        )}
                     </>
                 )}
 
