@@ -102,6 +102,40 @@ export const getAllListings = async (req, res) => {
   return res.status(200).json({ listings: data });
 };
 
+// DELETE /api/marketplace/:id — only the listing owner can delete
+export const deleteListing = async (req, res) => {
+  const { id } = req.params;
+  const user_id = req.user?.id;
+
+  if (!user_id) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  // Fetch the listing first to verify ownership
+  const { data: listing, error: fetchError } = await supabase
+    .from("marketplace")
+    .select("id, user_id")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !listing) {
+    return res.status(404).json({ error: "Listing not found" });
+  }
+
+  if (listing.user_id !== user_id) {
+    return res.status(403).json({ error: "Forbidden: you can only delete your own listings" });
+  }
+
+  const { error: deleteError } = await supabase
+    .from("marketplace")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) return res.status(500).json({ error: deleteError.message });
+
+  return res.status(200).json({ message: "Listing deleted" });
+};
+
 // GET /api/marketplace/:id
 export const getListingById = async (req, res) => {
   const { id } = req.params;
