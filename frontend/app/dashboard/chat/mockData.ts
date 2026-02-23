@@ -7,6 +7,8 @@ export interface Message {
 
 export interface Chat {
     id: number;
+    /** Unique user ID of the other participant — used to derive the socket room. */
+    userId?: string;
     name: string;
     initials: string;
     lastMessage: string;
@@ -17,10 +19,20 @@ export interface Chat {
     messages: Message[];
 }
 
+/** Represents a platform user that can be searched to start a new chat. */
+export interface User {
+    id: string;
+    name: string;
+    initials: string;
+    online?: boolean;
+    role?: string;
+}
+
+/** Seed data — only the AI assistant. Real user chats are created at runtime. */
 export const CHATS_DATA: Chat[] = [
     {
         id: 0,
-        name: "CodeYatra AI",
+        name: "Beacon AI",
         initials: "AI",
         lastMessage: "How can I help you with your project today?",
         time: "Just now",
@@ -29,40 +41,6 @@ export const CHATS_DATA: Chat[] = [
         messages: [
             { id: 1, text: "Hello! I'm your CodeYatra AI assistant.", sender: "them", timestamp: "10:00 AM" },
             { id: 2, text: "How can I help you with your project today?", sender: "them", timestamp: "10:01 AM" },
-        ],
-    },
-    {
-        id: 1,
-        name: "Maneesh Shrestha",
-        initials: "MS",
-        lastMessage: "I've reviewed the latest design patterns.",
-        time: "2m ago",
-        unread: 2,
-        online: true,
-        messages: [
-            { id: 1, text: "Hey, did you see the new UI updates?", sender: "them", timestamp: "9:45 AM" },
-            { id: 2, text: "I've reviewed the latest design patterns.", sender: "them", timestamp: "9:46 AM" },
-        ],
-    },
-    {
-        id: 2,
-        name: "Rahul Gupta",
-        initials: "RG",
-        lastMessage: "Let's sync up tomorrow about the API integration.",
-        time: "1h ago",
-        messages: [
-            { id: 1, text: "The database schema looks good.", sender: "them", timestamp: "Yesterday" },
-            { id: 2, text: "Let's sync up tomorrow about the API integration.", sender: "them", timestamp: "Yesterday" },
-        ],
-    },
-    {
-        id: 3,
-        name: "Sagar Poudel",
-        initials: "SP",
-        lastMessage: "I've pushed the fix for the navigation bug.",
-        time: "3h ago",
-        messages: [
-            { id: 1, text: "I've pushed the fix for the navigation bug.", sender: "them", timestamp: "2:00 PM" },
         ],
     },
 ];

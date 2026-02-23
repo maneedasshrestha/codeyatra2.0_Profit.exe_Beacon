@@ -1,7 +1,7 @@
 // Resource interfaces and mock data for ResourcesPage
 
 export interface Resource {
-  id: number;
+  id: string;
   title: string;
   subject: string;
   type: string;
@@ -10,6 +10,10 @@ export interface Resource {
   size: string;
   course: string;
   fileUrl?: string;
+  upvotes_count?: number;
+  downvotes_count?: number;
+  has_upvoted?: boolean;
+  has_downvoted?: boolean;
 }
 
 export const COURSES = ["All", "Engineering", "BIT", "BCA", "MCA", "Physics"];
@@ -28,7 +32,7 @@ export const TYPES = ["All", "Notes", "Past Papers", "Lab Report", "Cheatsheet"]
 
 export const SEED: Resource[] = [
   {
-    id: 1,
+    id: "1",
     title: "Data Structures & Algorithms",
     subject: "DSA",
     type: "Notes",
@@ -36,9 +40,11 @@ export const SEED: Resource[] = [
     semester: "3rd",
     size: "2.4 MB",
     course: "Engineering",
+    upvotes_count: 0,
+    downvotes_count: 0,
   },
   {
-    id: 2,
+    id: "2",
     title: "Engineering Mathematics II",
     subject: "Math",
     type: "Past Papers",
@@ -46,9 +52,11 @@ export const SEED: Resource[] = [
     semester: "2nd",
     size: "1.1 MB",
     course: "Engineering",
+    upvotes_count: 0,
+    downvotes_count: 0,
   },
   {
-    id: 3,
+    id: "3",
     title: "Digital Logic Lab Manual",
     subject: "DLC",
     type: "Lab Report",
@@ -56,9 +64,11 @@ export const SEED: Resource[] = [
     semester: "2nd",
     size: "800 KB",
     course: "Engineering",
+    upvotes_count: 0,
+    downvotes_count: 0,
   },
   {
-    id: 4,
+    id: "4",
     title: "Computer Architecture Notes",
     subject: "CA",
     type: "Notes",
@@ -68,7 +78,7 @@ export const SEED: Resource[] = [
     course: "BIT",
   },
   {
-    id: 5,
+    id: "5",
     title: "C Programming Cheatsheet",
     subject: "C",
     type: "Cheatsheet",
@@ -78,7 +88,7 @@ export const SEED: Resource[] = [
     course: "BCA",
   },
   {
-    id: 6,
+    id: "6",
     title: "Operating Systems Slides",
     subject: "OS",
     type: "Notes",
@@ -88,7 +98,7 @@ export const SEED: Resource[] = [
     course: "BIT",
   },
   {
-    id: 7,
+    id: "7",
     title: "Microprocessor Past Papers",
     subject: "MP",
     type: "Past Papers",
@@ -96,9 +106,11 @@ export const SEED: Resource[] = [
     semester: "4th",
     size: "980 KB",
     course: "Engineering",
+    upvotes_count: 0,
+    downvotes_count: 0,
   },
   {
-    id: 8,
+    id: "8",
     title: "Microprocessor Past Papers",
     subject: "MP",
     type: "Past Papers",
@@ -106,9 +118,11 @@ export const SEED: Resource[] = [
     semester: "4th",
     size: "980 KB",
     course: "Engineering",
+    upvotes_count: 0,
+    downvotes_count: 0,
   },
   {
-    id: 9,
+    id: "9",
     title: "Microprocessor Past Papers",
     subject: "MP",
     type: "Past Papers",

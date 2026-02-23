@@ -1,6 +1,5 @@
 "use client";
-import React from "react";
-import { Role } from "../dashboard/market/components/types";
+import { Role } from "../dashboard/market/types";
 
 interface RoleToggleProps {
   role: Role;

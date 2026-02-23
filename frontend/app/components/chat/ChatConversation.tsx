@@ -1,40 +1,119 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Smile, Paperclip, ChevronLeft } from "lucide-react";
 import Avatar from "@/app/components/Avatar";
 import { Chat, Message } from "../../dashboard/chat/mockData";
 
 interface ChatConversationProps {
     chat: Chat | null;
+    messages: Message[];
+    onUpdateMessages: (messages: Message[]) => void;
+    /** For non-AI chats: called with the message text so the parent can emit via socket. */
+    onSendMessage?: (text: string) => void;
+    /** Called with true when user starts typing, false when they stop. */
+    onTyping?: (isTyping: boolean) => void;
+    /** True when the other user in this chat is typing. */
+    isTyping?: boolean;
     onBack: () => void;
 }
 
-const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => {
+const ChatConversation: React.FC<ChatConversationProps> = ({
+    chat,
+    messages,
+    onUpdateMessages,
+    onSendMessage,
+    onTyping,
+    isTyping = false,
+    onBack,
+}) => {
     const [messageText, setMessageText] = useState("");
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Update messages when chat changes
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    // Scroll to bottom whenever messages or loading / typing state changes
     useEffect(() => {
-        if (chat) {
-            setMessages(chat.messages);
-        } else {
-            setMessages([]);
-        }
-    }, [chat]);
+        scrollToBottom();
+    }, [messages, isLoading, isTyping]);
 
-    const handleSendMessage = () => {
-        if (!messageText.trim()) return;
+    const handleTextChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            setMessageText(e.target.value);
+            if (!chat?.isAi && onTyping) {
+                onTyping(true);
+                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = setTimeout(() => onTyping(false), 2000);
+            }
+        },
+        [chat, onTyping]
+    );
 
-        const newMessage: Message = {
-            id: Date.now(),
-            text: messageText,
-            sender: "me",
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
+    const handleSendMessage = async () => {
+        if (!messageText.trim() || isLoading) return;
 
-        setMessages((prev) => [...prev, newMessage]);
+        const userMsgText = messageText;
         setMessageText("");
+
+        // Stop typing indicator immediately on send
+        if (!chat?.isAi && onTyping) {
+            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+            onTyping(false);
+        }
+
+        if (chat?.isAi) {
+            // For AI chat: optimistically add the message locally
+            const newMessage: Message = {
+                id: Date.now(),
+                text: userMsgText,
+                sender: "me",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            };
+            onUpdateMessages([...messages, newMessage]);
+            setIsLoading(true);
+            try {
+                // Assuming backend runs on port 5000 based on backend/src/index.js
+                const response = await fetch("http://localhost:5000/api/ai/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        message: userMsgText,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.response) {
+                    const aiMessage: Message = {
+                        id: Date.now() + 1,
+                        text: data.response,
+                        sender: "them",
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    };
+                    onUpdateMessages([...messages, newMessage, aiMessage]);
+                }
+            } catch (error) {
+                console.error("AI Chat Error:", error);
+                const errorMessage: Message = {
+                    id: Date.now() + 1,
+                    text: "Sorry, I'm having trouble connecting right now. As a senior, I should tell you: sometimes the system just goes down. Try again later!",
+                    sender: "them",
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                };
+                onUpdateMessages([...messages, newMessage, errorMessage]);
+            } finally {
+                setIsLoading(false);
+            }
+        } else {
+            // For real chats: delegate send to the parent (which emits via socket)
+            onSendMessage?.(userMsgText);
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -98,8 +177,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => 
                     >
                         <div
                             className={`max-w-[85%] md:max-w-[70%] px-5 py-3.5 rounded-[1.5rem] text-[14px] font-medium leading-relaxed shadow-sm ${msg.sender === "me"
-                                    ? "bg-violet-600 text-white rounded-tr-none"
-                                    : "bg-white text-gray-800 rounded-tl-none border border-black/5"
+                                ? "bg-violet-600 text-white rounded-tr-none"
+                                : "bg-white text-gray-800 rounded-tl-none border border-black/5"
                                 }`}
                         >
                             <p>{msg.text}</p>
@@ -112,6 +191,16 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => 
                         </div>
                     </div>
                 ))}
+                {(isLoading || isTyping) && (
+                    <div className="flex justify-start">
+                        <div className="bg-white text-gray-800 px-5 py-3.5 rounded-[1.5rem] rounded-tl-none border border-black/5 shadow-sm text-[14px] flex gap-1 items-center">
+                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
                 <div className="h-20" /> {/* Extra space at bottom for scrolling */}
             </div>
 
@@ -125,7 +214,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => 
                         type="text"
                         placeholder="Write a message..."
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={handleTextChange}
                         onKeyDown={handleKeyPress}
                         className="flex-1 bg-transparent border-none outline-none text-[14px] font-medium px-4 py-3 placeholder:text-gray-300"
                     />
@@ -134,13 +223,13 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => 
                     </button>
                     <button
                         onClick={handleSendMessage}
-                        disabled={!messageText.trim()}
-                        className={`p-3 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center w-11 h-11 ${messageText.trim()
-                                ? "bg-violet-600 text-white shadow-violet-200"
-                                : "bg-gray-100 text-gray-300"
+                        disabled={!messageText.trim() || isLoading}
+                        className={`p-3 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center w-11 h-11 ${messageText.trim() && !isLoading
+                            ? "bg-violet-600 text-white shadow-violet-200"
+                            : "bg-gray-100 text-gray-300"
                             }`}
                     >
-                        <Send size={18} fill={messageText.trim() ? "currentColor" : "none"} />
+                        <Send size={18} fill={messageText.trim() && !isLoading ? "currentColor" : "none"} />
                     </button>
                 </div>
             </div>

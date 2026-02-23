@@ -5,6 +5,7 @@ import {
   getAllResources,
   getResourceById,
   toggleUpvote,
+  toggleDownvote,
   deleteResource,
 } from "../controllers/resource.controllers.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
@@ -43,6 +44,7 @@ router.post("/", requireAuth, upload.single("file"), uploadResource);
 router.get("/", getAllResources);
 router.get("/:id", getResourceById);
 router.post("/:id/upvote", requireAuth, toggleUpvote);
+router.post("/:id/downvote", requireAuth, toggleDownvote);
 router.delete("/:id", requireAuth, deleteResource);
 
 export default router;

@@ -1,4 +1,5 @@
 import { createClient } from "../utils/supabaseClient.js";
+import supabaseAdmin from "../utils/supabase.js";
 
 // 1. SIGN UP
 export const signup = async (req, res) => {
@@ -159,9 +160,9 @@ export const completeProfile = async (req, res) => {
   }
 
   // Validate role
-  if (!["junior", "senior", "both"].includes(role)) {
+  if (!["junior", "senior", "alumni"].includes(role)) {
     return res.status(400).json({
-      error: "Role must be one of: junior, senior, both",
+      error: "Role must be one of: junior, senior, alumni",
     });
   }
 
@@ -255,7 +256,47 @@ export const uploadAvatar = async (req, res) => {
   res.json({ avatar_url: urlData.publicUrl });
 };
 
-// ✨ 7. UPDATE PROFILE (NEW)
+// ✨ 9. SEARCH USERS (for new chat initiation)
+export const searchUsers = async (req, res) => {
+  // User is already verified by requireAuth middleware — available as req.user
+  const user = req.user;
+
+  const { q = "" } = req.query;
+
+  if (!q.trim()) {
+    return res.status(200).json({ users: [] });
+  }
+
+  // Case-insensitive partial match on name, exclude the caller themselves
+  const { data, error } = await supabaseAdmin
+    .from("users")
+    .select("id, name, college, role")
+    .ilike("name", `%${q.trim()}%`)
+    .neq("id", user.id)
+    .eq("profile_completed", true)
+    .limit(10);
+
+  if (error) {
+    return res.status(500).json({ error: "Failed to search users" });
+  }
+
+  // Shape the response to match the frontend User type
+  const users = (data || []).map((u) => ({
+    id: u.id,
+    name: u.name || "Unknown",
+    initials: (u.name || "?")
+      .split(" ")
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .slice(0, 2)
+      .join(""),
+    role: u.role || u.college || "",
+    online: false, // real presence would come from socket tracking
+  }));
+
+  return res.status(200).json({ users });
+};
+
+// ✨ 10. UPDATE PROFILE
 export const updateProfile = async (req, res) => {
   const supabase = createClient({ req, res });
 

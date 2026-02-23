@@ -9,7 +9,7 @@ export default function DashboardLayout({
   return (
     <div className="flex flex-col h-dvh overflow-hidden bg-[#F8F7FA]">
       <TopBar />
-      <main className="flex-1 overflow-hidden relative">
+      <main className="flex-1 overflow-y-auto relative">
         {children}
       </main>
       <BottomNavBar />

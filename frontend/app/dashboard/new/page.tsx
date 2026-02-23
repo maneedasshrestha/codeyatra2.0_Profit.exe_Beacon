@@ -16,7 +16,7 @@ let _id = 0;
 const uid = () => String(++_id);
 
 type Visibility = "public" | "batch";
-type FileKind = "doc" | "image";
+// type FileKind = "doc" | "image";
 
 export default function NewPostPage() {
   const router = useRouter();
