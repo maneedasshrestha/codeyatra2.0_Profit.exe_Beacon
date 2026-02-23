@@ -28,7 +28,11 @@ export const signup = async (req, res) => {
     }
   }
 
-  res.status(201).json({ message: "email verified, user created", data });
+  res.status(201).json({
+    message: "User created",
+    session: data.session,
+    token: data.session?.access_token,
+  });
 };
 
 // 2. LOGIN

@@ -18,7 +18,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", corsOptions);
+
 app.use("/auth", authroutes);
 
 app.get("/test", (req, res) => {
