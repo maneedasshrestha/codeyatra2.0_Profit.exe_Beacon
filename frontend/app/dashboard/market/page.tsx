@@ -6,7 +6,6 @@ import BuyConfirmModal from "../../components/BuyConfirmModal";
 import EmptyState from "../../components/EmptyState";
 import ItemDetailModal from "../../components/ItemDetailModal";
 import { MarketItem, Role } from "./types";
-import { SEED_ITEMS, loadItems, saveItems } from "./mockData";
 import BackgroundGlowBlobs from "../../components/market/BackgroundGlowBlobs";
 import MarketHeader from "../../components/market/MarketHeader";
 import WishlistPanel from "../../components/market/WishlistPanel";
@@ -21,20 +20,43 @@ import {
   handleBuyClick,
   handleBuyConfirm,
   handleWishlist,
+  apiListingToMarketItem,
 } from "./marketUtils";
+import { getListings, getAuthToken } from "../../lib/marketplaceApi";
 
 export default function MarketPage() {
   const [role, setRole] = useState<Role>("buyer");
-  const [items, setItems] = useState<MarketItem[]>(SEED_ITEMS);
+  const [items, setItems] = useState<MarketItem[]>([]);
   const [purchased, setPurchased] = useState<MarketItem[]>([]);
   const [newlyListed, setNewlyListed] = useState<Set<string>>(new Set());
+  const [loadingItems, setLoadingItems] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [addLoading, setAddLoading] = useState(false);
+
+  // Fetch listings from backend on mount
   useEffect(() => {
-    const storedItems = loadItems();
-    setItems(storedItems);
+    let cancelled = false;
+    setLoadingItems(true);
+    setFetchError(null);
+    getListings()
+      .then((listings) => {
+        if (cancelled) return;
+        setItems(listings.map((l) => apiListingToMarketItem(l)));
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setFetchError(
+          err instanceof Error ? err.message : "Failed to load listings"
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingItems(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
-  useEffect(() => {
-    saveItems(items);
-  }, [items]);
+
   const [addOpen, setAddOpen] = useState(false);
   const [buyTarget, setBuyTarget] = useState<MarketItem | null>(null);
   const [buyOpen, setBuyOpen] = useState(false);
@@ -113,7 +135,17 @@ export default function MarketPage() {
           {showPurchases && role === "buyer" && purchased.length > 0 && (
             <PurchasesPanel purchased={purchased} />
           )}
-          {visibleItems.length === 0 ? (
+          {loadingItems && (
+            <div className="flex justify-center items-center py-20">
+              <div
+                className="w-8 h-8 rounded-full border-4 border-violet-200 border-t-violet-600 animate-spin"
+              />
+            </div>
+          )}
+          {fetchError && !loadingItems && (
+            <p className="text-center text-sm text-red-400 py-10">{fetchError}</p>
+          )}
+          {!loadingItems && !fetchError && visibleItems.length === 0 ? (
             <EmptyState role={role} />
           ) : (
             <div className="grid grid-cols-2 gap-3">
@@ -151,8 +183,14 @@ export default function MarketPage() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSubmit={(form) =>
-          handleAddSubmit(form, setItems, setNewlyListed, setAddOpen, (msg) =>
-            showToast(setToast, msg),
+          handleAddSubmit(
+            form,
+            getAuthToken(),
+            setItems,
+            setNewlyListed,
+            setAddOpen,
+            (msg) => showToast(setToast, msg),
+            setAddLoading,
           )
         }
       />
