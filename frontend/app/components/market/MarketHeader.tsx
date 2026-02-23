@@ -1,5 +1,5 @@
-import RoleToggle from "../../components/RoleToggle";
-import { Role } from "./types";
+import RoleToggle from "../RoleToggle";
+import { Role } from "../../dashboard/market/types";
 
 interface MarketHeaderProps {
   role: Role;

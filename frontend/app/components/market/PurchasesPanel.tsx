@@ -1,4 +1,4 @@
-import { MarketItem } from "./types";
+import { MarketItem } from "../../dashboard/market/types";
 
 interface PurchasesPanelProps {
   purchased: MarketItem[];

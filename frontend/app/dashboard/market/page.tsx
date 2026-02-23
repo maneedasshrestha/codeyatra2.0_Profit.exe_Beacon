@@ -7,11 +7,11 @@ import EmptyState from "../../components/EmptyState";
 import ItemDetailModal from "../../components/ItemDetailModal";
 import { MarketItem, Role } from "./types";
 import { SEED_ITEMS, loadItems, saveItems } from "./mockData";
-import BackgroundGlowBlobs from "./BackgroundGlowBlobs";
-import MarketHeader from "./MarketHeader";
-import WishlistPanel from "./WishlistPanel";
-import PurchasesPanel from "./PurchasesPanel";
-import AddItemFAB from "./AddItemFAB";
+import BackgroundGlowBlobs from "../../components/market/BackgroundGlowBlobs";
+import MarketHeader from "../../components/market/MarketHeader";
+import WishlistPanel from "../../components/market/WishlistPanel";
+import PurchasesPanel from "../../components/market/PurchasesPanel";
+import AddItemFAB from "../../components/market/AddItemFAB";
 import {
   showToast,
   handleAddSubmit,
