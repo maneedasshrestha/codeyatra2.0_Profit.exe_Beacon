@@ -270,7 +270,7 @@ export const searchUsers = async (req, res) => {
   // Case-insensitive partial match on name, exclude the caller themselves
   const { data, error } = await supabaseAdmin
     .from("users")
-    .select("id, name, college, role")
+    .select("id, name, college, role, avatar_url")
     .ilike("name", `%${q.trim()}%`)
     .neq("id", user.id)
     .eq("profile_completed", true)
@@ -291,6 +291,7 @@ export const searchUsers = async (req, res) => {
       .join(""),
     role: u.role || u.college || "",
     online: false, // real presence would come from socket tracking
+    avatar_url: u.avatar_url || null,
   }));
 
   return res.status(200).json({ users });

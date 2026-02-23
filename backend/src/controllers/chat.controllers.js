@@ -34,7 +34,7 @@ export const getConversations = async (req, res) => {
   // 3. Fetch profiles for those users
   const { data: profiles } = await supabase
     .from("users")
-    .select("id, name, role")
+    .select("id, name, role, avatar_url")
     .in("id", otherUserIds);
 
   const profileMap = Object.fromEntries(
@@ -67,6 +67,7 @@ export const getConversations = async (req, res) => {
         name,
         initials,
         role: profile?.role ?? null,
+        avatar_url: profile?.avatar_url ?? null,
         lastMessage: lastMsg?.text ?? "Say hello!",
         lastMessageSenderId: lastMsg?.sender_id ?? null,
         time: lastMsg

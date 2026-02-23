@@ -109,7 +109,7 @@ const ChatList: React.FC<ChatListProps> = ({
                                         className="flex items-center gap-3 p-4 mx-2 rounded-[1.5rem] hover:bg-violet-50 transition-all group"
                                     >
                                         <div className="relative shrink-0">
-                                            <Avatar initials={user.initials} size="md" />
+                                            <Avatar initials={user.initials} imgSrc={user.avatarUrl} size="md" />
                                             {user.online && (
                                                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm" />
                                             )}
@@ -154,6 +154,7 @@ const ChatList: React.FC<ChatListProps> = ({
                                         key={chat.id}
                                         name={chat.name}
                                         initials={chat.initials}
+                                        avatarUrl={chat.avatarUrl}
                                         lastMessage={chat.lastMessage}
                                         time={chat.time}
                                         unread={chat.unread}

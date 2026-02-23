@@ -151,7 +151,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="relative shrink-0">
-                        <Avatar initials={chat.initials} size="md" />
+                        <Avatar initials={chat.initials} imgSrc={chat.avatarUrl} size="md" />
                         {chat.online && (
                             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
                         )}

@@ -33,6 +33,7 @@ export interface SearchedUser {
   initials: string;
   online: boolean;
   role?: string;
+  avatar_url?: string;
 }
 
 export interface UserProfile {
@@ -90,6 +91,7 @@ export interface ConversationSummary {
   lastMessageSenderId: string | null;
   time: string;
   updatedAt: string;
+  avatar_url?: string;
 }
 
 /**

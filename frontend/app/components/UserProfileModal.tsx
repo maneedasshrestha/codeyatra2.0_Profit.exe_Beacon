@@ -59,7 +59,9 @@ export default function UserProfileModal({
     const name = profile?.name ?? authorName;
     const ini = initials;
     router.push(
-      `/dashboard/chat?userId=${encodeURIComponent(userId)}&name=${encodeURIComponent(name)}&initials=${encodeURIComponent(ini)}&role=${encodeURIComponent(roleLabel)}`
+      `/dashboard/chat?userId=${encodeURIComponent(userId)}&name=${encodeURIComponent(name)}&initials=${encodeURIComponent(ini)}&role=${encodeURIComponent(roleLabel)}${
+        avatarUrl ? `&avatarUrl=${encodeURIComponent(avatarUrl)}` : ""
+      }`
     );
   };
 

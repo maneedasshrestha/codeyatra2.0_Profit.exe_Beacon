@@ -11,6 +11,7 @@ export interface Chat {
     userId?: string;
     name: string;
     initials: string;
+    avatarUrl?: string;
     lastMessage: string;
     time: string;
     unread?: number;
@@ -26,6 +27,7 @@ export interface User {
     initials: string;
     online?: boolean;
     role?: string;
+    avatarUrl?: string;
 }
 
 /** Seed data — only the AI assistant. Real user chats are created at runtime. */

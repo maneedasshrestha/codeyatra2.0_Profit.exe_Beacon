@@ -4,6 +4,7 @@ import Avatar from "@/app/components/Avatar";
 interface ChatTileProps {
     name: string;
     initials: string;
+    avatarUrl?: string;
     lastMessage: string;
     time: string;
     unread?: number;
@@ -15,6 +16,7 @@ interface ChatTileProps {
 const ChatTile: React.FC<ChatTileProps> = ({
     name,
     initials,
+    avatarUrl,
     lastMessage,
     time,
     unread,
@@ -31,7 +33,7 @@ const ChatTile: React.FC<ChatTileProps> = ({
                 }`}
         >
             <div className="relative">
-                <Avatar initials={initials} size="md" />
+                <Avatar initials={initials} imgSrc={avatarUrl} size="md" />
                 {online && (
                     <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm" />
                 )}

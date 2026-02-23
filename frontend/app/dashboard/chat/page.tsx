@@ -71,6 +71,7 @@ const ChatPage = () => {
     const name = searchParams.get("name");
     const initials = searchParams.get("initials") ?? "?";
     const role = searchParams.get("role") ?? "";
+    const avatarUrl = searchParams.get("avatarUrl") ?? undefined;
     if (!userId || !name) return;
 
     setChats((prev) => {
@@ -86,6 +87,7 @@ const ChatPage = () => {
         userId,
         name,
         initials,
+        avatarUrl,
         online: false,
         lastMessage: "Say hello!",
         time: "Now",
@@ -116,6 +118,7 @@ const ChatPage = () => {
             userId: co.userId,
             name: co.name,
             initials: co.initials,
+            avatarUrl: co.avatar_url,
             lastMessage: co.lastMessage,
             time: co.time,
             messages: [],
@@ -290,7 +293,11 @@ const ChatPage = () => {
       const results = await searchUsers(q);
       // Exclude users already in the chat list
       const existingIds = new Set(chats.map((c) => c.userId).filter(Boolean));
-      setSearchResults(results.filter((u) => !existingIds.has(u.id)));
+      setSearchResults(
+        results
+          .filter((u) => !existingIds.has(u.id))
+          .map((u) => ({ ...u, avatarUrl: u.avatar_url }))
+      );
       setIsSearchFetching(false);
     }, 300);
   }, [chats]);
@@ -309,6 +316,7 @@ const ChatPage = () => {
         userId: user.id,
         name: user.name,
         initials: user.initials,
+        avatarUrl: user.avatarUrl,
         online: user.online,
         lastMessage: "Say hello!",
         time: "Now",
