@@ -7,8 +7,22 @@ import { CHATS_DATA } from "./mockData";
 
 const ChatPage = () => {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null); // Default to list view
+  const [allMessages, setAllMessages] = useState<{ [key: number]: any[] }>(
+    CHATS_DATA.reduce((acc, chat) => {
+      acc[chat.id] = chat.messages;
+      return acc;
+    }, {} as { [key: number]: any[] })
+  );
 
   const selectedChat = CHATS_DATA.find((c) => c.id === selectedChatId) || null;
+  const selectedMessages = selectedChatId !== null ? allMessages[selectedChatId] : [];
+
+  const handleUpdateMessages = (chatId: number, newMessages: any[]) => {
+    setAllMessages((prev) => ({
+      ...prev,
+      [chatId]: newMessages,
+    }));
+  };
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -27,6 +41,8 @@ const ChatPage = () => {
         <div className={`flex-1 h-full ${selectedChatId === null ? "hidden md:flex" : "flex"} relative`}>
           <ChatConversation
             chat={selectedChat}
+            messages={selectedMessages}
+            onUpdateMessages={(newMsgs) => selectedChatId !== null && handleUpdateMessages(selectedChatId, newMsgs)}
             onBack={() => setSelectedChatId(null)}
           />
         </div>

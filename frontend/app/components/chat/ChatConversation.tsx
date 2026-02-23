@@ -1,40 +1,83 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Send, Smile, Paperclip, ChevronLeft } from "lucide-react";
 import Avatar from "@/app/components/Avatar";
 import { Chat, Message } from "../../dashboard/chat/mockData";
 
 interface ChatConversationProps {
     chat: Chat | null;
+    messages: Message[];
+    onUpdateMessages: (messages: Message[]) => void;
     onBack: () => void;
 }
 
-const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => {
+const ChatConversation: React.FC<ChatConversationProps> = ({ chat, messages, onUpdateMessages, onBack }) => {
     const [messageText, setMessageText] = useState("");
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Update messages when chat changes
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    // Scroll to bottom whenever messages or loading state changes
     useEffect(() => {
-        if (chat) {
-            setMessages(chat.messages);
-        } else {
-            setMessages([]);
-        }
-    }, [chat]);
+        scrollToBottom();
+    }, [messages, isLoading]);
 
-    const handleSendMessage = () => {
-        if (!messageText.trim()) return;
+    const handleSendMessage = async () => {
+        if (!messageText.trim() || isLoading) return;
 
+        const userMsgText = messageText;
         const newMessage: Message = {
             id: Date.now(),
-            text: messageText,
+            text: userMsgText,
             sender: "me",
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
-        setMessages((prev) => [...prev, newMessage]);
+        onUpdateMessages([...messages, newMessage]);
         setMessageText("");
+
+        if (chat?.isAi) {
+            setIsLoading(true);
+            try {
+                // Assuming backend runs on port 5000 based on backend/src/index.js
+                const response = await fetch("http://localhost:5000/api/ai/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        message: userMsgText,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.response) {
+                    const aiMessage: Message = {
+                        id: Date.now() + 1,
+                        text: data.response,
+                        sender: "them",
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    };
+                    onUpdateMessages([...messages, newMessage, aiMessage]);
+                }
+            } catch (error) {
+                console.error("AI Chat Error:", error);
+                const errorMessage: Message = {
+                    id: Date.now() + 1,
+                    text: "Sorry, I'm having trouble connecting right now. As a senior, I should tell you: sometimes the system just goes down. Try again later!",
+                    sender: "them",
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                onUpdateMessages([...messages, newMessage, errorMessage]);
+            } finally {
+                setIsLoading(false);
+            }
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -98,8 +141,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => 
                     >
                         <div
                             className={`max-w-[85%] md:max-w-[70%] px-5 py-3.5 rounded-[1.5rem] text-[14px] font-medium leading-relaxed shadow-sm ${msg.sender === "me"
-                                    ? "bg-violet-600 text-white rounded-tr-none"
-                                    : "bg-white text-gray-800 rounded-tl-none border border-black/5"
+                                ? "bg-violet-600 text-white rounded-tr-none"
+                                : "bg-white text-gray-800 rounded-tl-none border border-black/5"
                                 }`}
                         >
                             <p>{msg.text}</p>
@@ -112,6 +155,16 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => 
                         </div>
                     </div>
                 ))}
+                {isLoading && (
+                    <div className="flex justify-start">
+                        <div className="bg-white text-gray-800 px-5 py-3.5 rounded-[1.5rem] rounded-tl-none border border-black/5 shadow-sm text-[14px] flex gap-1 items-center">
+                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
                 <div className="h-20" /> {/* Extra space at bottom for scrolling */}
             </div>
 
@@ -134,13 +187,13 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => 
                     </button>
                     <button
                         onClick={handleSendMessage}
-                        disabled={!messageText.trim()}
-                        className={`p-3 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center w-11 h-11 ${messageText.trim()
-                                ? "bg-violet-600 text-white shadow-violet-200"
-                                : "bg-gray-100 text-gray-300"
+                        disabled={!messageText.trim() || isLoading}
+                        className={`p-3 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center w-11 h-11 ${messageText.trim() && !isLoading
+                            ? "bg-violet-600 text-white shadow-violet-200"
+                            : "bg-gray-100 text-gray-300"
                             }`}
                     >
-                        <Send size={18} fill={messageText.trim() ? "currentColor" : "none"} />
+                        <Send size={18} fill={messageText.trim() && !isLoading ? "currentColor" : "none"} />
                     </button>
                 </div>
             </div>

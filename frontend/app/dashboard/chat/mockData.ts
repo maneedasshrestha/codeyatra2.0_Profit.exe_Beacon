@@ -20,7 +20,7 @@ export interface Chat {
 export const CHATS_DATA: Chat[] = [
     {
         id: 0,
-        name: "CodeYatra AI",
+        name: "Beacon AI",
         initials: "AI",
         lastMessage: "How can I help you with your project today?",
         time: "Just now",

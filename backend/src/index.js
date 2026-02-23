@@ -4,13 +4,30 @@ import authroutes from "./routes/user-auth.route.js";
 import postsRouter from "./routes/posts.routes.js";
 import marketplaceRouter from "./routes/marketplace.routes.js";
 import resourceRouter from "./routes/resource.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 import { getFeed } from "./controllers/posts.controllers.js";
 import cors from "cors";
 
 const app = express();
 app.use(express.json());
+
+// List of allowed origins
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:3000",
+  "http://localhost:3000/",
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "*",
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.indexOf(origin + "/") !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -31,6 +48,7 @@ app.get("/test", (req, res) => {
 app.use("/api/posts", postsRouter);
 app.use("/api/marketplace", marketplaceRouter);
 app.use("/api/resources", resourceRouter);
+app.use("/api/ai", aiRoutes);
 
 // Shorthand feed endpoint: GET /feed?college=X&semester=Y
 app.get("/feed", getFeed);
