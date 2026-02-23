@@ -66,9 +66,9 @@ export default function ItemDetailModal({
           className="relative w-full overflow-hidden"
           style={{ height: 200 }}
         >
-          {item.imageUrl ? (
+          {item.image_url ? (
             <img
-              src={item.imageUrl}
+              src={item.image_url}
               alt={item.name}
               className="w-full h-full object-cover"
             />
@@ -106,7 +106,7 @@ export default function ItemDetailModal({
           )}
 
           {/* Gradient overlay at bottom for readability */}
-          {item.imageUrl && (
+          {item.image_url && (
             <div
               className="absolute inset-x-0 bottom-0 h-16"
               style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35), transparent)" }}

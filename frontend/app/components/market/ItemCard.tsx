@@ -65,9 +65,9 @@ export default function ItemCard({
         style={{ height: 130 }}
         onClick={() => onViewDetail(item)}
       >
-        {item.imageUrl ? (
+        {item.image_url ? (
           <img
-            src={item.imageUrl}
+            src={item.image_url}
             alt={item.name}
             className="w-full h-full object-cover"
           />
@@ -110,9 +110,9 @@ export default function ItemCard({
         <div
           className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full"
           style={{
-            background: accent + "22",
-            color: accent,
-            border: `1px solid ${accent}55`,
+            background: "rgba(255, 255, 255, 0.88)",
+            color: "#111827",
+            border: "1px solid rgba(255, 255, 255, 0.95)",
             backdropFilter: "blur(4px)",
           }}
         >
