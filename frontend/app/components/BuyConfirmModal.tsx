@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { MarketItem } from "../dashboard/market/components/types";
+import { MarketItem } from "../dashboard/market/types";
 
 interface BuyConfirmModalProps {
   item: MarketItem | null;

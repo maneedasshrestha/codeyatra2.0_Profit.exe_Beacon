@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { MarketItem, Role } from "../dashboard/market/components/types";
+import { MarketItem, Role } from "../dashboard/market/types";
 
 const PALETTE = [
   ["#f3e8ff", "#c084fc"],

@@ -106,7 +106,7 @@ export default function ItemDetailModal({
           )}
 
           {/* Gradient overlay at bottom for readability */}
-          {item.imageUrl && (
+          {item.image_url && (
             <div
               className="absolute inset-x-0 bottom-0 h-16"
               style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35), transparent)" }}
