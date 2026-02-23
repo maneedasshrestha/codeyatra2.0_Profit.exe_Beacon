@@ -1,14 +1,19 @@
 import "dotenv/config";
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import authroutes from "./routes/user-auth.route.js";
 import postsRouter from "./routes/posts.routes.js";
 import marketplaceRouter from "./routes/marketplace.routes.js";
 import resourceRouter from "./routes/resource.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
+import chatRouter from "./routes/chat.routes.js";
 import { getFeed } from "./controllers/posts.controllers.js";
 import cors from "cors";
+import { registerChatHandlers } from "./socket/chatHandler.js";
 
 const app = express();
+const httpServer = createServer(app);
 app.use(express.json());
 
 // List of allowed origins
@@ -36,6 +41,24 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Socket.IO setup
+const io = new Server(httpServer, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log(`Socket connected: ${socket.id}`);
+  registerChatHandlers(io, socket);
+
+  socket.on("disconnect", () => {
+    console.log(`Socket disconnected: ${socket.id}`);
+  });
+});
+
 app.use("/auth", authroutes);
 
 app.get("/test", (req, res) => {
@@ -49,10 +72,11 @@ app.use("/api/posts", postsRouter);
 app.use("/api/marketplace", marketplaceRouter);
 app.use("/api/resources", resourceRouter);
 app.use("/api/ai", aiRoutes);
+app.use("/api/chat", chatRouter);
 
 // Shorthand feed endpoint: GET /feed?college=X&semester=Y
 app.get("/feed", getFeed);
 
-app.listen(process.env.PORT || 5000, () => {
+httpServer.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on port ${process.env.PORT || 5000}`);
 });

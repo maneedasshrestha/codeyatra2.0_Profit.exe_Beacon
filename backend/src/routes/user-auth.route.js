@@ -10,7 +10,9 @@ import {
   completeProfile,
   updateProfile,
   uploadAvatar,
+  searchUsers,
 } from "../controllers/user-auth.controllers.js";
+import { requireAuth } from "../middleware/auth.middleware.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -36,6 +38,9 @@ router.post("/logout", logout);
 
 // 5. GET CURRENT USER
 router.get("/me", getMe);
+
+// 9. SEARCH USERS (for starting new private chats)
+router.get("/users/search", requireAuth, searchUsers);
 
 // ✨ 6. COMPLETE PROFILE (NEW)
 router.post("/complete-profile", completeProfile);

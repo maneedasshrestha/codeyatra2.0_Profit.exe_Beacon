@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Smile, Paperclip, ChevronLeft } from "lucide-react";
 import Avatar from "@/app/components/Avatar";
 import { Chat, Message } from "../../dashboard/chat/mockData";
@@ -9,38 +9,71 @@ interface ChatConversationProps {
     chat: Chat | null;
     messages: Message[];
     onUpdateMessages: (messages: Message[]) => void;
+    /** For non-AI chats: called with the message text so the parent can emit via socket. */
+    onSendMessage?: (text: string) => void;
+    /** Called with true when user starts typing, false when they stop. */
+    onTyping?: (isTyping: boolean) => void;
+    /** True when the other user in this chat is typing. */
+    isTyping?: boolean;
     onBack: () => void;
 }
 
-const ChatConversation: React.FC<ChatConversationProps> = ({ chat, messages, onUpdateMessages, onBack }) => {
+const ChatConversation: React.FC<ChatConversationProps> = ({
+    chat,
+    messages,
+    onUpdateMessages,
+    onSendMessage,
+    onTyping,
+    isTyping = false,
+    onBack,
+}) => {
     const [messageText, setMessageText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // Scroll to bottom whenever messages or loading state changes
+    // Scroll to bottom whenever messages or loading / typing state changes
     useEffect(() => {
         scrollToBottom();
-    }, [messages, isLoading]);
+    }, [messages, isLoading, isTyping]);
+
+    const handleTextChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            setMessageText(e.target.value);
+            if (!chat?.isAi && onTyping) {
+                onTyping(true);
+                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = setTimeout(() => onTyping(false), 2000);
+            }
+        },
+        [chat, onTyping]
+    );
 
     const handleSendMessage = async () => {
         if (!messageText.trim() || isLoading) return;
 
         const userMsgText = messageText;
-        const newMessage: Message = {
-            id: Date.now(),
-            text: userMsgText,
-            sender: "me",
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-
-        onUpdateMessages([...messages, newMessage]);
         setMessageText("");
 
+        // Stop typing indicator immediately on send
+        if (!chat?.isAi && onTyping) {
+            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+            onTyping(false);
+        }
+
         if (chat?.isAi) {
+            // For AI chat: optimistically add the message locally
+            const newMessage: Message = {
+                id: Date.now(),
+                text: userMsgText,
+                sender: "me",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            };
+            onUpdateMessages([...messages, newMessage]);
             setIsLoading(true);
             try {
                 // Assuming backend runs on port 5000 based on backend/src/index.js
@@ -61,7 +94,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, messages, onU
                         id: Date.now() + 1,
                         text: data.response,
                         sender: "them",
-                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                     };
                     onUpdateMessages([...messages, newMessage, aiMessage]);
                 }
@@ -71,12 +104,15 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, messages, onU
                     id: Date.now() + 1,
                     text: "Sorry, I'm having trouble connecting right now. As a senior, I should tell you: sometimes the system just goes down. Try again later!",
                     sender: "them",
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 };
                 onUpdateMessages([...messages, newMessage, errorMessage]);
             } finally {
                 setIsLoading(false);
             }
+        } else {
+            // For real chats: delegate send to the parent (which emits via socket)
+            onSendMessage?.(userMsgText);
         }
     };
 
@@ -155,7 +191,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, messages, onU
                         </div>
                     </div>
                 ))}
-                {isLoading && (
+                {(isLoading || isTyping) && (
                     <div className="flex justify-start">
                         <div className="bg-white text-gray-800 px-5 py-3.5 rounded-[1.5rem] rounded-tl-none border border-black/5 shadow-sm text-[14px] flex gap-1 items-center">
                             <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
@@ -178,7 +214,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ chat, messages, onU
                         type="text"
                         placeholder="Write a message..."
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={handleTextChange}
                         onKeyDown={handleKeyPress}
                         className="flex-1 bg-transparent border-none outline-none text-[14px] font-medium px-4 py-3 placeholder:text-gray-300"
                     />
