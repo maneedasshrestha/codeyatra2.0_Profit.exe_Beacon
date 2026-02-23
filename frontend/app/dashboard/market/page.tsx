@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ItemCard from "../../components/market/ItemCard";
 import AddItemModal from "../../components/market/AddItemModal";
 import BuyConfirmModal from "../../components/market/BuyConfirmModal";
@@ -23,8 +23,11 @@ import {
   apiListingToMarketItem,
 } from "./marketUtils";
 import { getListings, getAuthToken } from "../../lib/marketplaceApi";
+import { fetchCurrentUser, type CurrentUser } from "@/lib/api";
+import { getSocket } from "@/lib/socket";
 
 export default function MarketPage() {
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [role, setRole] = useState<Role>("buyer");
   const [items, setItems] = useState<MarketItem[]>([]);
   const [purchased, setPurchased] = useState<MarketItem[]>([]);
@@ -32,6 +35,38 @@ export default function MarketPage() {
   const [loadingItems, setLoadingItems] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [addLoading, setAddLoading] = useState(false);
+
+  // Load current user and connect socket
+  useEffect(() => {
+    fetchCurrentUser().then((user) => {
+      if (user) {
+        setCurrentUser(user);
+        const socket = getSocket(user.id, user.name);
+        if (!socket.connected) socket.connect();
+      }
+    });
+  }, []);
+
+  /** Sends an order confirmation message into the buyer–seller chat room. */
+  const sendOrderToSeller = useCallback(
+    (sellerId: string, orderText: string) => {
+      if (!currentUser) return;
+      const roomId = [currentUser.id, sellerId].sort().join("--");
+      const socket = getSocket(currentUser.id, currentUser.name);
+      if (!socket.connected) socket.connect();
+      socket.emit("join_chat", { chatId: roomId });
+      // Small delay so join_chat is processed before the message insert
+      setTimeout(() => {
+        socket.emit("send_message", {
+          chatId: roomId,
+          text: orderText,
+          senderId: currentUser.id,
+          senderName: currentUser.name,
+        });
+      }, 300);
+    },
+    [currentUser]
+  );
 
   // Fetch listings from backend on mount
   useEffect(() => {
@@ -211,6 +246,7 @@ export default function MarketPage() {
             setBuyOpen,
             setBuyTarget,
             (msg) => showToast(setToast, msg),
+            sendOrderToSeller,
           )
         }
       />

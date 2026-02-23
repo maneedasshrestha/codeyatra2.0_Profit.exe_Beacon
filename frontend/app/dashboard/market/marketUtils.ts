@@ -139,7 +139,8 @@ export function handleBuyConfirm(
   setPurchased: React.Dispatch<React.SetStateAction<MarketItem[]>>,
   setBuyOpen: React.Dispatch<React.SetStateAction<boolean>>,
   setBuyTarget: React.Dispatch<React.SetStateAction<MarketItem | null>>,
-  setToast: (msg: string | null) => void
+  setToast: (msg: string | null) => void,
+  sendOrderToSeller?: (sellerId: string, orderText: string) => void
 ) {
   if (!buyTarget) return;
   setItems((prev) => prev.filter((it) => it.id !== buyTarget.id));
@@ -156,6 +157,19 @@ export function handleBuyConfirm(
   setPurchased((prev) => [buyTarget, ...prev]);
   setBuyOpen(false);
   setBuyTarget(null);
+
+  // Send order message to seller's chat if seller ID is known
+  if (sendOrderToSeller && buyTarget.user_id) {
+    const orderNumber = String(Date.now());
+    const orderData = {
+      orderNumber,
+      productName: buyTarget.name,
+      productImage: buyTarget.image_url ?? null,
+      price: buyTarget.price,
+    };
+    sendOrderToSeller(buyTarget.user_id, `__ORDER__:${JSON.stringify(orderData)}`);
+  }
+
   showToast(setToast, "Request sent to seller!");
 }
 

@@ -181,27 +181,64 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar pb-32">
-                {messages.map((msg) => (
-                    <div
-                        key={msg.id}
-                        className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
-                    >
+                {messages.map((msg) => {
+                    const isOrder = msg.text.startsWith("__ORDER__:");
+                    const orderData: { orderNumber: string; productName: string; productImage?: string | null; price: number } | null = isOrder
+                        ? (() => { try { return JSON.parse(msg.text.slice("__ORDER__:".length)); } catch { return null; } })()
+                        : null;
+
+                    return (
                         <div
-                            className={`max-w-[85%] md:max-w-[70%] px-5 py-3.5 rounded-[1.5rem] text-[14px] font-medium leading-relaxed shadow-sm ${msg.sender === "me"
-                                ? "bg-violet-600 text-white rounded-tr-none"
-                                : "bg-white text-gray-800 rounded-tl-none border border-black/5"
-                                }`}
+                            key={msg.id}
+                            className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
                         >
-                            <p>{msg.text}</p>
-                            <span
-                                className={`text-[10px] block mt-1.5 font-bold ${msg.sender === "me" ? "text-white/60 text-right" : "text-gray-400"
-                                    }`}
-                            >
-                                {msg.timestamp}
-                            </span>
+                            {isOrder && orderData ? (
+                                /* ── Order confirmation card ── */
+                                <div className="max-w-[85%] md:max-w-[70%] bg-white rounded-[1.5rem] shadow-sm border border-black/5 overflow-hidden">
+                                    <div className="px-4 pt-3 pb-2">
+                                        <p className="text-[11px] font-bold text-gray-700 tracking-tight">
+                                            Order Number #{orderData.orderNumber}
+                                        </p>
+                                    </div>
+                                    <div className="h-px bg-gray-100" />
+                                    <div className="flex items-center gap-3 px-4 py-3">
+                                        {orderData.productImage ? (
+                                            <img
+                                                src={orderData.productImage}
+                                                alt={orderData.productName}
+                                                className="w-12 h-12 object-cover rounded-xl shrink-0 border border-gray-100"
+                                            />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-xl shrink-0 bg-violet-50 flex items-center justify-center">
+                                                <span className="text-[18px]">🛍️</span>
+                                            </div>
+                                        )}
+                                        <p className="text-[13px] font-semibold text-gray-800 line-clamp-2 leading-snug">
+                                            {orderData.productName}
+                                        </p>
+                                    </div>
+                                    <div className="pb-1" />
+                                </div>
+                            ) : (
+                                /* ── Normal message bubble ── */
+                                <div
+                                    className={`max-w-[85%] md:max-w-[70%] px-5 py-3.5 rounded-[1.5rem] text-[14px] font-medium leading-relaxed shadow-sm ${msg.sender === "me"
+                                        ? "bg-violet-600 text-white rounded-tr-none"
+                                        : "bg-white text-gray-800 rounded-tl-none border border-black/5"
+                                        }`}
+                                >
+                                    <p>{msg.text}</p>
+                                    <span
+                                        className={`text-[10px] block mt-1.5 font-bold ${msg.sender === "me" ? "text-white/60 text-right" : "text-gray-400"
+                                            }`}
+                                    >
+                                        {msg.timestamp}
+                                    </span>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
                 {(isLoading || isTyping) && (
                     <div className="flex justify-start">
                         <div className="bg-white text-gray-800 px-5 py-3.5 rounded-[1.5rem] rounded-tl-none border border-black/5 shadow-sm text-[14px] flex gap-1 items-center">
