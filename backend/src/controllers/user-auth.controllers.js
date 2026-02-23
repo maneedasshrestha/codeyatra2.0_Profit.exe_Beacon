@@ -159,9 +159,9 @@ export const completeProfile = async (req, res) => {
   }
 
   // Validate role
-  if (!["junior", "senior", "both"].includes(role)) {
+  if (!["junior", "senior", "alumni"].includes(role)) {
     return res.status(400).json({
-      error: "Role must be one of: junior, senior, both",
+      error: "Role must be one of: junior, senior, alumni",
     });
   }
 
@@ -204,6 +204,55 @@ export const completeProfile = async (req, res) => {
     message: "Profile completed successfully",
     profile: data && data.length > 0 ? data[0] : data,
   });
+};
+
+// ✨ 8. UPLOAD AVATAR
+export const uploadAvatar = async (req, res) => {
+  const supabase = createClient({ req, res });
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ error: "No file provided" });
+  }
+
+  const ext = req.file.originalname.split(".").pop();
+  const filePath = `${user.id}/avatar.${ext}`;
+
+  // Remove old avatar first (ignore errors if none exists)
+  await supabase.storage.from("avatars").remove([filePath]);
+
+  const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(filePath, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    return res
+      .status(500)
+      .json({ error: "Upload failed", details: uploadError.message });
+  }
+
+  const { data: urlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(filePath);
+
+  // Save avatar_url to users table
+  await supabase
+    .from("users")
+    .update({ avatar_url: urlData.publicUrl })
+    .eq("id", user.id);
+
+  res.json({ avatar_url: urlData.publicUrl });
 };
 
 // ✨ 7. UPDATE PROFILE (NEW)

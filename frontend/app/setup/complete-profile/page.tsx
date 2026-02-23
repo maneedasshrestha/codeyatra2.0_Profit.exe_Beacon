@@ -15,7 +15,7 @@ import {
 
 const STREAMS = ["Engineering", "BIT", "BCA", "MCA", "Physics", "Other"];
 const SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
-const ROLES = ["junior", "senior", "both"];
+const ROLES = ["junior", "senior", "alumni"];
 
 type Form = {
   name: string;
