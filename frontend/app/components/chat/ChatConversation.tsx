@@ -186,29 +186,16 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar pb-32">
-                {isMessagesLoading ? (
-                    /* Skeleton loading bubbles */
-                    <div className="space-y-4 animate-pulse">
-                        <div className="flex justify-start">
-                            <div className="h-10 w-48 bg-gray-200 rounded-[1.5rem] rounded-tl-none" />
-                        </div>
-                        <div className="flex justify-end">
-                            <div className="h-10 w-36 bg-violet-200 rounded-[1.5rem] rounded-tr-none" />
-                        </div>
-                        <div className="flex justify-start">
-                            <div className="h-16 w-64 bg-gray-200 rounded-[1.5rem] rounded-tl-none" />
-                        </div>
-                        <div className="flex justify-end">
-                            <div className="h-10 w-52 bg-violet-200 rounded-[1.5rem] rounded-tr-none" />
-                        </div>
-                        <div className="flex justify-start">
-                            <div className="h-10 w-40 bg-gray-200 rounded-[1.5rem] rounded-tl-none" />
-                        </div>
-                        <div className="flex justify-end">
-                            <div className="h-10 w-28 bg-violet-200 rounded-[1.5rem] rounded-tr-none" />
+                {isMessagesLoading && (
+                    <div className="flex justify-start">
+                        <div className="bg-white px-5 py-3.5 rounded-[1.5rem] rounded-tl-none border border-black/5 shadow-sm flex gap-1 items-center">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                         </div>
                     </div>
-                ) : messages.map((msg) => {
+                )}
+                {!isMessagesLoading && messages.map((msg) => {
                     const isOrder = msg.text.startsWith("__ORDER__:");
                     const orderData: { orderNumber: string; productName: string; productImage?: string | null; price: number } | null = isOrder
                         ? (() => { try { return JSON.parse(msg.text.slice("__ORDER__:".length)); } catch { return null; } })()
