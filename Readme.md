@@ -1,1 +1,1 @@
-repo for storing the code for codeyatra project by profit.exe
+# repo for storing the code for codeyatra project by profit.exe
