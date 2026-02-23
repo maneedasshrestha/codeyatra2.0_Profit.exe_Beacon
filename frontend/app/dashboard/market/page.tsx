@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import ItemCard from "../../components/ItemCard";
-import AddItemModal from "../../components/AddItemModal";
-import BuyConfirmModal from "../../components/BuyConfirmModal";
-import EmptyState from "../../components/EmptyState";
-import ItemDetailModal from "../../components/ItemDetailModal";
+import ItemCard from "../../components/market/ItemCard";
+import AddItemModal from "../../components/market/AddItemModal";
+import BuyConfirmModal from "../../components/market/BuyConfirmModal";
+import EmptyState from "../../components/market/EmptyState";
+import ItemDetailModal from "../../components/market/ItemDetailModal";
 import { MarketItem, Role } from "./types";
 import BackgroundGlowBlobs from "../../components/market/BackgroundGlowBlobs";
 import MarketHeader from "../../components/market/MarketHeader";
