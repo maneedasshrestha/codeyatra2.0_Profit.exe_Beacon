@@ -10,6 +10,7 @@ export interface Post {
   community: string;
   author: string;
   authorInitials: string;
+  avatarUrl?: string;
   isSenior: boolean;
   timeAgo: string;
   title: string;

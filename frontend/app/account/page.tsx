@@ -28,6 +28,15 @@ export default function AccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    college: "",
+    stream: "",
+    semester: 0,
+    role: "",
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -116,6 +125,61 @@ export default function AccountPage() {
     router.push("/setup/login");
   }
 
+  function startEditing() {
+    if (!profile) return;
+    setEditForm({
+      name: profile.name,
+      college: profile.college,
+      stream: profile.stream,
+      semester: profile.semester,
+      role: profile.role,
+    });
+    setEditing(true);
+  }
+
+  function cancelEditing() {
+    setEditing(false);
+  }
+
+  async function handleSaveProfile() {
+    const token =
+      localStorage.getItem("auth_token") ||
+      sessionStorage.getItem("signup_token");
+    if (!token || !profile) return;
+
+    setSaving(true);
+    try {
+      const res = await fetch("http://localhost:5000/auth/update-profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editForm),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.profile) {
+        setProfile({
+          ...profile,
+          name: data.profile.name || profile.name,
+          college: data.profile.college || profile.college,
+          stream: data.profile.stream || profile.stream,
+          semester: data.profile.semester ?? profile.semester,
+          role: data.profile.role || profile.role,
+        });
+        setEditing(false);
+      } else {
+        alert(data.error || "Failed to update profile");
+      }
+    } catch (err) {
+      console.error("Update profile error:", err);
+      alert("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -185,6 +249,143 @@ export default function AccountPage() {
           <div className="mt-4">
             <AcademicCard credentials={credentials} />
           </div>
+
+          {/* Edit Profile Button */}
+          <div className="mx-4 mt-4">
+            <button
+              onClick={startEditing}
+              className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg,#8b5cf6,#6d28d9)",
+                color: "#fff",
+                boxShadow: "0 4px 16px rgba(124,58,237,0.25)",
+              }}
+            >
+              Edit Profile
+            </button>
+          </div>
+
+          {/* Edit Profile Modal */}
+          {editing && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+              <div
+                className="w-full max-w-md rounded-3xl p-6 space-y-4"
+                style={{
+                  background: "#fff",
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
+                }}
+              >
+                <h3 className="text-lg font-extrabold text-gray-900">
+                  Edit Profile
+                </h3>
+
+                {/* Name */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, name: e.target.value })
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                  />
+                </div>
+
+                {/* College */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    College
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.college}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, college: e.target.value })
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                  />
+                </div>
+
+                {/* Stream */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    Stream
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.stream}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, stream: e.target.value })
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                  />
+                </div>
+
+                {/* Semester */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    Semester
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={8}
+                    value={editForm.semester}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        semester: Number(e.target.value),
+                      })
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                  />
+                </div>
+
+                {/* Role */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    Role
+                  </label>
+                  <select
+                    value={editForm.role}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, role: e.target.value })
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white"
+                  >
+                    <option value="junior">Junior</option>
+                    <option value="senior">Senior</option>
+                    <option value="both">Both</option>
+                  </select>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={cancelEditing}
+                    disabled={saving}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-60"
+                    style={{
+                      background: "linear-gradient(135deg,#8b5cf6,#6d28d9)",
+                      boxShadow: "0 4px 12px rgba(124,58,237,0.3)",
+                    }}
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-4">
             <ActionMenu

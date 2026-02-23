@@ -225,7 +225,11 @@ export default function ThreadPage() {
             {/* Author */}
             <div className="flex items-center gap-3 mb-5">
               <div className="relative">
-                <Avatar initials={initials} size="lg" />
+                <Avatar
+                  initials={initials}
+                  imgSrc={post.user_avatar || undefined}
+                  size="lg"
+                />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">

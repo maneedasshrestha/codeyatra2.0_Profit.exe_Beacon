@@ -32,7 +32,7 @@ const PostCard: React.FC<PostCardProps> = ({
         {/* Author Row */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative">
-            <Avatar initials={post.authorInitials} />
+            <Avatar initials={post.authorInitials} imgSrc={post.avatarUrl} />
             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
           </div>
           <div className="flex-1 min-w-0">
