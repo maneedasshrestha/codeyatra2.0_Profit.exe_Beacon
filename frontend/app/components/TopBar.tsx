@@ -2,9 +2,41 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const TopBar = () => {
   const router = useRouter();
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("auth_token") ||
+      sessionStorage.getItem("signup_token");
+
+    if (token) {
+      fetch("http://localhost:5000/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.profile) {
+            setUserAvatar(data.profile.avatar_url || null);
+            setUserName(data.profile.name || "");
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  const initials = userName
+    ? userName
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "U";
 
   return (
     <nav
@@ -60,7 +92,7 @@ const TopBar = () => {
         {/* Right: avatar button */}
         <button
           onClick={() => router.push("/account")}
-          className="relative flex items-center justify-center w-10 h-10 rounded-2xl"
+          className="relative flex items-center justify-center w-10 h-10 rounded-2xl overflow-hidden"
           style={{
             background: "linear-gradient(135deg, #7c3aed, #a78bfa)",
             WebkitTapHighlightColor: "transparent",
@@ -68,9 +100,20 @@ const TopBar = () => {
           }}
           aria-label="Profile"
         >
-          <span className="text-white font-extrabold text-[14px] tracking-wide">
-            S
-          </span>
+          {userAvatar ? (
+            <Image
+              src={userAvatar}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="w-full h-full object-cover"
+              unoptimized
+            />
+          ) : (
+            <span className="text-white font-extrabold text-[14px] tracking-wide">
+              {initials}
+            </span>
+          )}
         </button>
       </div>
     </nav>
