@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.97.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "multer": "^2.0.2",
     "nodemon": "^3.1.14"
   }
 }
