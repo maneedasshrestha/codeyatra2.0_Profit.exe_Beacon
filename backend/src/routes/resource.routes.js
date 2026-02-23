@@ -8,7 +8,7 @@ import {
   toggleDownvote,
   deleteResource,
 } from "../controllers/resource.controllers.js";
-import { requireAuth } from "../middleware/auth.middleware.js";
+import { requireAuth, optionalAuth } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -41,8 +41,8 @@ const upload = multer({
 // DELETE /api/resources/:id        – delete (owner only)
 
 router.post("/", requireAuth, upload.single("file"), uploadResource);
-router.get("/", getAllResources);
-router.get("/:id", getResourceById);
+router.get("/", optionalAuth, getAllResources);
+router.get("/:id", optionalAuth, getResourceById);
 router.post("/:id/upvote", requireAuth, toggleUpvote);
 router.post("/:id/downvote", requireAuth, toggleDownvote);
 router.delete("/:id", requireAuth, deleteResource);
