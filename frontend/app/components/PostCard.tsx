@@ -70,9 +70,9 @@ const PostCard: React.FC<PostCardProps> = ({
         <div
           className={`flex items-center rounded-2xl overflow-hidden border transition-all duration-300 ${
             post.userVote === "up"
-              ? "border-violet-200 bg-violet-100/50 shadow-[0_2px_10px_rgba(139,92,246,0.1)]"
+              ? "border-green-200 bg-green-100/50 shadow-[0_2px_10px_rgba(139,92,246,0.1)]"
               : post.userVote === "down"
-                ? "border-orange-200 bg-orange-50"
+                ? "border-red-200 bg-red-50"
                 : "border-gray-200/50 bg-white"
           }`}
         >
@@ -83,8 +83,8 @@ const PostCard: React.FC<PostCardProps> = ({
             }}
             className={`p-2.5 transition-all ${
               post.userVote === "up"
-                ? "bg-violet-500 text-white"
-                : "hover:bg-violet-50 text-gray-400 hover:text-violet-500"
+                ? "bg-green-500 text-white"
+                : "hover:bg-violet-50 text-gray-400 hover:text-green-500"
             }`}
             aria-label="Upvote"
           >
@@ -93,9 +93,9 @@ const PostCard: React.FC<PostCardProps> = ({
           <span
             className={`text-[14px] font-bold tabular-nums px-2 ${
               post.userVote === "up"
-                ? "text-violet-600"
+                ? "text-green-600"
                 : post.userVote === "down"
-                  ? "text-orange-500"
+                  ? "text-red-500"
                   : "text-gray-700"
             }`}
           >
@@ -108,8 +108,8 @@ const PostCard: React.FC<PostCardProps> = ({
             }}
             className={`p-2.5 transition-all ${
               post.userVote === "down"
-                ? "bg-orange-500 text-white"
-                : "hover:bg-orange-50 text-gray-400 hover:text-orange-500"
+                ? "bg-red-500 text-white"
+                : "hover:bg-orange-50 text-gray-400 hover:text-red-500"
             }`}
             aria-label="Downvote"
           >

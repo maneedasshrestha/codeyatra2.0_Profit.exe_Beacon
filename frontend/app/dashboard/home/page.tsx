@@ -1,15 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
-import { Bell } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import PostCard from "../../components/PostCard";
 import { POSTS_DATA, Post, FILTERS } from "./mockData";
 import EndOfFeed from "../../components/EndOfFeed";
 import FilterPills from "@/app/components/FilterPills";
-import { button } from "framer-motion/client";
-import TopBar from "@/app/components/TopBar";
 
 const HomePage = () => {
   const router = useRouter();
@@ -35,7 +31,6 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col h-dvh bg-[#F8F7FA] overflow-hidden">
-      <TopBar />
       <div className="sticky top-0 z-20 bg-[#F8F7FA]/80 backdrop-blur-2xl">
         <FilterPills />
         <div className="h-px bg-linear-to-r from-transparent via-violet-100 to-transparent mx-4" />

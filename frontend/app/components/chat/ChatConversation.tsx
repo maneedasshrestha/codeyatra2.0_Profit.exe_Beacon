@@ -1,0 +1,151 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Send, Smile, Paperclip, ChevronLeft } from "lucide-react";
+import Avatar from "@/app/components/Avatar";
+import { Chat, Message } from "../../dashboard/chat/mockData";
+
+interface ChatConversationProps {
+    chat: Chat | null;
+    onBack: () => void;
+}
+
+const ChatConversation: React.FC<ChatConversationProps> = ({ chat, onBack }) => {
+    const [messageText, setMessageText] = useState("");
+    const [messages, setMessages] = useState<Message[]>([]);
+
+    // Update messages when chat changes
+    useEffect(() => {
+        if (chat) {
+            setMessages(chat.messages);
+        } else {
+            setMessages([]);
+        }
+    }, [chat]);
+
+    const handleSendMessage = () => {
+        if (!messageText.trim()) return;
+
+        const newMessage: Message = {
+            id: Date.now(),
+            text: messageText,
+            sender: "me",
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        setMessages((prev) => [...prev, newMessage]);
+        setMessageText("");
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    };
+
+    if (!chat) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center bg-[#F8F7FA] p-10 text-center">
+                <div className="w-20 h-20 bg-white rounded-[2rem] shadow-sm flex items-center justify-center mb-6 text-violet-200">
+                    <Send size={32} />
+                </div>
+                <h2 className="text-[20px] font-black text-gray-900 mb-2 tracking-tight">Select a conversation</h2>
+                <p className="text-[14px] font-medium text-gray-500 max-w-[280px]">
+                    Choose a chat from the sidebar to start messaging your teammates.
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex-1 flex flex-col h-full bg-[#F8F7FA] overflow-hidden relative">
+            {/* Header */}
+            <div className="bg-white/80 backdrop-blur-xl border-b border-gray-100 px-4 md:px-6 py-4 flex items-center gap-3 sticky top-0 z-10 min-h-[72px]">
+                {/* Mobile Back Button */}
+                <button
+                    onClick={onBack}
+                    className="md:hidden p-2 -ml-2 hover:bg-gray-50 rounded-xl text-gray-400 active:scale-90 transition-all font-bold flex items-center"
+                >
+                    <ChevronLeft size={24} />
+                </button>
+
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="relative shrink-0">
+                        <Avatar initials={chat.initials} size="md" />
+                        {chat.online && (
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
+                        )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <h3 className="text-[16px] font-black text-gray-900 leading-tight truncate">
+                            {chat.name}
+                            {chat.isAi && <span className="ml-2 text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full uppercase tracking-wider">AI</span>}
+                        </h3>
+                        <p className="text-[12px] font-semibold text-gray-400">
+                            {chat.online ? "Online now" : "Offline"}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar pb-32">
+                {messages.map((msg) => (
+                    <div
+                        key={msg.id}
+                        className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
+                    >
+                        <div
+                            className={`max-w-[85%] md:max-w-[70%] px-5 py-3.5 rounded-[1.5rem] text-[14px] font-medium leading-relaxed shadow-sm ${msg.sender === "me"
+                                    ? "bg-violet-600 text-white rounded-tr-none"
+                                    : "bg-white text-gray-800 rounded-tl-none border border-black/5"
+                                }`}
+                        >
+                            <p>{msg.text}</p>
+                            <span
+                                className={`text-[10px] block mt-1.5 font-bold ${msg.sender === "me" ? "text-white/60 text-right" : "text-gray-400"
+                                    }`}
+                            >
+                                {msg.timestamp}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+                <div className="h-20" /> {/* Extra space at bottom for scrolling */}
+            </div>
+
+            {/* Input - Positioned above BottomNavBar */}
+            <div className="absolute bottom-0 left-0 right-0 px-6 pt-4 pb-28 md:pb-32 bg-linear-to-t from-[#F8F7FA] via-[#F8F7FA]/90 to-transparent pointer-events-none">
+                <div className="bg-white border border-gray-100 rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-2 pr-2 flex items-center gap-2 pointer-events-auto">
+                    <button className="p-3 text-gray-400 hover:text-violet-500 transition-colors hidden sm:block">
+                        <Paperclip size={20} />
+                    </button>
+                    <input
+                        type="text"
+                        placeholder="Write a message..."
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        className="flex-1 bg-transparent border-none outline-none text-[14px] font-medium px-4 py-3 placeholder:text-gray-300"
+                    />
+                    <button className="p-3 text-gray-400 hover:text-violet-500 transition-colors">
+                        <Smile size={20} />
+                    </button>
+                    <button
+                        onClick={handleSendMessage}
+                        disabled={!messageText.trim()}
+                        className={`p-3 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center w-11 h-11 ${messageText.trim()
+                                ? "bg-violet-600 text-white shadow-violet-200"
+                                : "bg-gray-100 text-gray-300"
+                            }`}
+                    >
+                        <Send size={18} fill={messageText.trim() ? "currentColor" : "none"} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ChatConversation;
