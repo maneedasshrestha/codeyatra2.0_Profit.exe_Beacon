@@ -38,5 +38,5 @@ Need quick advice from someone who's been there? Our AI assistant adopts a "Seni
 
 ---
 
-## Why Beacon?
+## Why the name Beacon?
 We built Beacon to solve the real frustrations of student life: fragmented information, high costs of academic materials, and the need for a stronger digital community that translates into real-world campus connections.
