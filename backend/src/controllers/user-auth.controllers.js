@@ -28,7 +28,11 @@ export const signup = async (req, res) => {
     }
   }
 
-  res.status(201).json({ message: "email verified, user created", data });
+  res.status(201).json({
+    message: "User created",
+    session: data.session,
+    token: data.session?.access_token,
+  });
 };
 
 // 2. LOGIN
@@ -155,9 +159,9 @@ export const completeProfile = async (req, res) => {
   }
 
   // Validate role
-  if (!["junior", "senior", "both"].includes(role)) {
+  if (!["junior", "senior", "alumni"].includes(role)) {
     return res.status(400).json({
-      error: "Role must be one of: junior, senior, both",
+      error: "Role must be one of: junior, senior, alumni",
     });
   }
 

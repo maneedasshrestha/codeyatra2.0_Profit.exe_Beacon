@@ -1,5 +1,32 @@
-import { AddItemForm, MarketItem, Role } from "./types";
-import { genId, genSeed } from "./mockData";
+import { AddItemForm, MarketItem, Role, Condition, Category } from "./types";
+import { genSeed } from "./mockData";
+import {
+  createListing as apiCreateListing,
+  ApiListing,
+} from "../../lib/marketplaceApi";
+
+/** Convert a backend ApiListing into the frontend MarketItem shape */
+export function apiListingToMarketItem(
+  listing: ApiListing,
+  sellerName = "Unknown"
+): MarketItem {
+  return {
+    id: listing.id,
+    name: listing.title,
+    description: listing.description ?? "",
+    price: listing.price,
+    colorSeed: genSeed(),
+    createdAt: listing.created_at
+      ? new Date(listing.created_at).getTime()
+      : Date.now(),
+    sellerName,
+    condition: (listing.condition as Condition) ?? "Good",
+    location: listing.college ?? "",
+    image_url: listing.image_url,
+    category: (listing.category as Category) ?? null,
+    user_id: listing.user_id,
+  };
+}
 
 export function showToast(setToast: (msg: string | null) => void, msg: string | null) {
   if (msg) {
@@ -8,29 +35,46 @@ export function showToast(setToast: (msg: string | null) => void, msg: string | 
   }
 }
 
-export function handleAddSubmit(
+export async function handleAddSubmit(
   form: AddItemForm,
+  token: string | null,
   setItems: React.Dispatch<React.SetStateAction<MarketItem[]>>,
   setNewlyListed: React.Dispatch<React.SetStateAction<Set<string>>>,
   setAddOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  setToast: (msg: string | null) => void
+  setToast: (msg: string | null) => void,
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const newItem: MarketItem = {
-    id: genId(),
-    name: form.name,
-    description: form.description,
-    price: Number(form.price),
-    colorSeed: genSeed(),
-    createdAt: Date.now(),
-    sellerName: form.sellerName,
-    condition: form.condition,
-    location: form.location,
-    imageUrl: form.imageUrl,
-  };
-  setItems((prev) => [newItem, ...prev]);
-  setNewlyListed((prev) => new Set([...prev, newItem.id]));
-  showToast(setToast, "Item listed — buyers can now see it");
-  setAddOpen(false);
+  if (!token) {
+    showToast(setToast, "You must be logged in to list an item");
+    return;
+  }
+
+  setLoading?.(true);
+  try {
+    const listing = await apiCreateListing(
+      {
+        title: form.name,
+        description: form.description,
+        price: Number(form.price),
+        category: form.category || undefined,
+        condition: form.condition,
+        college: form.location,
+        image: form.image ?? null,
+      },
+      token
+    );
+
+    const newItem = apiListingToMarketItem(listing, form.sellerName);
+    setItems((prev) => [newItem, ...prev]);
+    setNewlyListed((prev) => new Set([...prev, newItem.id]));
+    showToast(setToast, "Item listed — buyers can now see it");
+    setAddOpen(false);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to create listing";
+    showToast(setToast, msg);
+  } finally {
+    setLoading?.(false);
+  }
 }
 
 export function handleDelete(
