@@ -65,9 +65,9 @@ export default function ItemCard({
         style={{ height: 130 }}
         onClick={() => onViewDetail(item)}
       >
-        {item.imageUrl ? (
+        {item.image_url ? (
           <img
-            src={item.imageUrl}
+            src={item.image_url}
             alt={item.name}
             className="w-full h-full object-cover"
           />

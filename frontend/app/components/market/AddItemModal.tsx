@@ -15,7 +15,8 @@ const EMPTY: AddItemForm = {
   sellerName: "",
   condition: "Good",
   location: "",
-  imageUrl: undefined,
+  category: "",
+  image: null,
 };
 
 export default function AddItemModal({
@@ -39,8 +40,7 @@ export default function AddItemModal({
     if (!file) return;
     const url = URL.createObjectURL(file);
     setPreview(url);
-    // Store the object URL for now; friend's Supabase upload will replace this with a real URL
-    setForm((prev) => ({ ...prev, imageUrl: url }));
+    setForm((prev) => ({ ...prev, image: file }));
   };
 
   const validate = (): boolean => {
@@ -153,7 +153,7 @@ export default function AddItemModal({
                   className="mt-1.5 text-xs text-red-400 font-semibold"
                   onClick={() => {
                     setPreview(null);
-                    setForm((prev) => ({ ...prev, imageUrl: undefined }));
+                    setForm((prev) => ({ ...prev, image: null }));
                     if (fileRef.current) fileRef.current.value = "";
                   }}
                 >
