@@ -38,9 +38,13 @@ const ChatPage = () => {
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Always holds the latest chats without causing effect re-runs. */
   const chatsRef = useRef<Chat[]>(chats);
   useEffect(() => { chatsRef.current = chats; }, [chats]);
+  /** Always holds the latest allMessages without causing effect re-runs. */
+  const allMessagesRef = useRef<{ [roomId: string]: Message[] }>(allMessages);
+  useEffect(() => { allMessagesRef.current = allMessages; }, [allMessages]);
 
   /**
    * Derives the deterministic private room ID for any chat.
@@ -251,8 +255,22 @@ const ChatPage = () => {
     // We only want to join when the *selected chat* actually changes.
     const chat = chatsRef.current.find((c) => c.id === selectedChatId);
     if (chat && !chat.isAi) {
-      setLoadingRoomIds((prev) => new Set(prev).add(getRoomId(chat)));
-      socket.emit("join_chat", { chatId: getRoomId(chat) });
+      const roomId = getRoomId(chat);
+      // Only show loading spinner if we don't already have cached messages
+      const alreadyCached = (allMessagesRef.current[roomId]?.length ?? 0) > 0;
+      if (!alreadyCached) {
+        setLoadingRoomIds((prev) => new Set(prev).add(roomId));
+        // Fallback: clear loading after 4 s in case chat_history never arrives
+        if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = setTimeout(() => {
+          setLoadingRoomIds((prev) => {
+            const next = new Set(prev);
+            next.delete(roomId);
+            return next;
+          });
+        }, 4000);
+      }
+      socket.emit("join_chat", { chatId: roomId });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChatId, getRoomId]);
