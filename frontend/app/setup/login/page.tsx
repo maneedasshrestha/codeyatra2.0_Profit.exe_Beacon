@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { AuthBackground } from "@/app/setup/components/AuthBackground";
 import { AuthLogo } from "@/app/setup/components/AuthLogo";
 import { AuthCard } from "@/app/setup/components/AuthCard";
-import { AuthDivider } from "@/app/setup/components/AuthDivider";
-import { GoogleButton } from "@/app/setup/components/GoogleButton";
 import { LoginForm } from "./components/LoginForm";
 
 export default function LoginPage() {
@@ -40,7 +38,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-5">
+    <div className="min-h-screen flex flex-col items-center justify-center px-5 -mt-32">
       <AuthBackground />
       <div className="w-full max-w-[380px] flex flex-col gap-6">
         <AuthLogo title="Welcome back" />
@@ -52,8 +50,7 @@ export default function LoginPage() {
             onChange={onChange}
             onSubmit={handleSubmit}
           />
-          <AuthDivider />
-          <GoogleButton />
+
         </AuthCard>
         <p className="text-center text-[13px]" style={{ color: "#9ca3af" }}>
           Don&apos;t have an account?{" "}
