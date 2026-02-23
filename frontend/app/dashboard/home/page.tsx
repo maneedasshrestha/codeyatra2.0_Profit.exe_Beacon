@@ -61,6 +61,7 @@ const HomePage = () => {
               community: `c/${p.college}-${p.semester}`,
               author: authorName,
               authorInitials: initials,
+              avatarUrl: p.user_avatar || "",
               isSenior: false,
               timeAgo: getTimeAgo(p.created_at),
               title:
