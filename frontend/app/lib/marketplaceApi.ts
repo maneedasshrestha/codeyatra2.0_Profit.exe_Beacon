@@ -53,8 +53,8 @@ export function getAuthToken(): string | null {
   } catch {
     // ignore
   }
-  // Also check a manual "beacon_token" key (set during login in this app)
-  return localStorage.getItem("beacon_token");
+  // Also check the key used by this app's login flow
+  return localStorage.getItem("auth_token");
 }
 
 // ─── API calls ────────────────────────────────────────────────────────────────

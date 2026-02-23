@@ -20,7 +20,12 @@ type Visibility = "public" | "batch";
 
 export default function NewPostPage() {
   const router = useRouter();
-  const [user, setUser] = useState({ name: "", batch: "", initials: "" });
+  const [user, setUser] = useState({
+    name: "",
+    batch: "",
+    initials: "",
+    avatarUrl: "",
+  });
   const [userProfile, setUserProfile] = useState<any>(null);
   const [postType, setPostType] = useState<PostType>("discussion");
   const [title, setTitle] = useState("");
@@ -65,6 +70,7 @@ export default function NewPostPage() {
             name: data.profile.name || "User",
             batch: `c/${data.profile.college}-${data.profile.stream}`,
             initials,
+            avatarUrl: data.profile.avatar_url || "",
           });
         } else {
           router.replace("/setup/login");
