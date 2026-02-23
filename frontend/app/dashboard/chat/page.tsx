@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import ChatList from "../../components/chat/ChatList";
 import ChatConversation from "../../components/chat/ChatConversation";
 import { CHATS_DATA, Message, Chat, User } from "./mockData";
@@ -12,6 +13,7 @@ import type { Socket } from "socket.io-client";
 const AI_ROOM = "ai-0";
 
 const ChatPage = () => {
+  const searchParams = useSearchParams();
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [chats, setChats] = useState<Chat[]>(CHATS_DATA);
@@ -62,6 +64,38 @@ const ChatPage = () => {
       // If null, the user is not logged in — let auth redirect handle it
     });
   }, []);
+
+  // ── Step 1c: Auto-start a chat from URL params (e.g. from profile modal) ─
+  useEffect(() => {
+    const userId = searchParams.get("userId");
+    const name = searchParams.get("name");
+    const initials = searchParams.get("initials") ?? "?";
+    const role = searchParams.get("role") ?? "";
+    if (!userId || !name) return;
+
+    setChats((prev) => {
+      const existing = prev.find((c) => c.userId === userId);
+      if (existing) {
+        // Delay to let state settle before selecting
+        setTimeout(() => setSelectedChatId(existing.id), 50);
+        return prev;
+      }
+      const newId = Date.now();
+      const newChat: Chat = {
+        id: newId,
+        userId,
+        name,
+        initials,
+        online: false,
+        lastMessage: "Say hello!",
+        time: "Now",
+        messages: [],
+      };
+      setTimeout(() => setSelectedChatId(newId), 50);
+      return [...prev, newChat];
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // ── Step 1b: Load past conversations once we know who the current user is ─
   useEffect(() => {
@@ -338,4 +372,10 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default function ChatPageWrapper() {
+  return (
+    <Suspense>
+      <ChatPage />
+    </Suspense>
+  );
+}

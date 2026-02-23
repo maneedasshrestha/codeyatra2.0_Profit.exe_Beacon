@@ -6,11 +6,13 @@ import PostCard from "../../components/PostCard";
 import { Post } from "./mockData";
 import EndOfFeed from "../../components/EndOfFeed";
 import FilterPills from "@/app/components/FilterPills";
+import UserProfileModal from "@/app/components/UserProfileModal";
 
 const HomePage = () => {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profilePost, setProfilePost] = useState<Post | null>(null);
 
   useEffect(() => {
     const token =
@@ -58,6 +60,7 @@ const HomePage = () => {
 
             return {
               id: p.id,
+              userId: p.user_id || "",
               community: `c/${p.college}-${p.semester}`,
               author: authorName,
               authorInitials: initials,
@@ -171,11 +174,22 @@ const HomePage = () => {
               onVote={handleVote}
               onSave={handleSave}
               onNavigate={handleNavigate}
+              onAuthorClick={(p) => setProfilePost(p)}
             />
           ))}
         </div>
         <EndOfFeed />
       </main>
+
+      {profilePost && profilePost.userId && (
+        <UserProfileModal
+          userId={profilePost.userId}
+          authorName={profilePost.author}
+          authorInitials={profilePost.authorInitials}
+          avatarUrl={profilePost.avatarUrl}
+          onClose={() => setProfilePost(null)}
+        />
+      )}
     </div>
   );
 };

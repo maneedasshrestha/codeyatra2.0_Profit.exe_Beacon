@@ -8,6 +8,7 @@ interface PostCardProps {
   onVote: (id: number, dir: "up" | "down") => void;
   onSave: (id: number) => void;
   onNavigate: (id: number) => void;
+  onAuthorClick?: (post: Post) => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -15,6 +16,7 @@ const PostCard: React.FC<PostCardProps> = ({
   onVote,
   onSave,
   onNavigate,
+  onAuthorClick,
 }) => {
   const voteCount =
     post.userVote === "up"
@@ -37,9 +39,15 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[14px] font-bold text-gray-900 group-hover:text-violet-600 transition-colors">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAuthorClick?.(post);
+                }}
+                className="text-[14px] font-bold text-gray-900 hover:text-violet-600 transition-colors active:scale-95"
+              >
                 {post.author}
-              </span>
+              </button>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="text-[12px] font-semibold text-violet-500/80 bg-violet-50 px-2 py-0.5 rounded-lg">

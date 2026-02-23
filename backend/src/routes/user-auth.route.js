@@ -11,6 +11,7 @@ import {
   updateProfile,
   uploadAvatar,
   searchUsers,
+  getUserById,
 } from "../controllers/user-auth.controllers.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 
@@ -41,6 +42,9 @@ router.get("/me", getMe);
 
 // 9. SEARCH USERS (for starting new private chats)
 router.get("/users/search", requireAuth, searchUsers);
+
+// 10b. GET USER PROFILE BY ID
+router.get("/users/:id", requireAuth, getUserById);
 
 // ✨ 6. COMPLETE PROFILE (NEW)
 router.post("/complete-profile", completeProfile);
