@@ -110,9 +110,9 @@ export default function ItemCard({
         <div
           className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full"
           style={{
-            background: accent + "22",
-            color: accent,
-            border: `1px solid ${accent}55`,
+            background: "#ffffff",
+            color: "#000000",
+            border: `1px solid #e0e0e0`,
             backdropFilter: "blur(4px)",
           }}
         >
