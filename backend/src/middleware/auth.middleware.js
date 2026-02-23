@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import supabase from "../utils/supabase.js";
 
 export const requireAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
