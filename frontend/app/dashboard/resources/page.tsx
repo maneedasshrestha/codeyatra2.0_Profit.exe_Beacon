@@ -33,7 +33,7 @@ export default function ResourcesPage() {
       className="h-full w-full flex justify-center overflow-y-auto"
       style={{ background: "#f3f4f6" }}
     >
-      <div className="w-full max-w-103 flex flex-col pb-36">
+      <div className="w-full max-w-103 flex flex-col pb-40">
         {/* Header */}
         <ResourceHeader
           course={course}
