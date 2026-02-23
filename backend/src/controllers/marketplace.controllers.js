@@ -39,10 +39,12 @@ const uploadImageToBucket = async (file) => {
 
 // POST /api/marketplace
 export const createListing = async (req, res) => {
-  const { user_id, title, description, price, category, condition, college } = req.body;
+  const { title, description, price, category, condition, college } = req.body;
+  // user_id is taken from the authenticated user, not the request body
+  const user_id = req.user?.id;
 
   if (!user_id || !title || !price) {
-    return res.status(400).json({ error: "user_id, title, and price are required" });
+    return res.status(400).json({ error: "title and price are required" });
   }
 
   let image_url = null;
