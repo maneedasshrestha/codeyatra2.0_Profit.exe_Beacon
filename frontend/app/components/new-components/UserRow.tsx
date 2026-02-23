@@ -1,7 +1,8 @@
 import React from "react";
+import Image from "next/image";
 
 interface UserRowProps {
-  user: { name: string; batch: string; initials: string };
+  user: { name: string; batch: string; initials: string; avatarUrl?: string };
   visibility: "public" | "batch";
   setVisibility: (v: "public" | "batch") => void;
   postType: string;
@@ -14,12 +15,25 @@ const UserRow: React.FC<UserRowProps> = ({
   postType,
 }) => (
   <div className="flex items-center gap-3 px-4 pt-5 pb-5">
-    <div
-      className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0"
-      style={{ background: "linear-gradient(135deg,#8b5cf6,#6d28d9)" }}
-    >
-      {user.initials}
-    </div>
+    {user.avatarUrl ? (
+      <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+        <Image
+          src={user.avatarUrl}
+          alt={user.name}
+          width={40}
+          height={40}
+          className="w-full h-full object-cover"
+          unoptimized
+        />
+      </div>
+    ) : (
+      <div
+        className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0"
+        style={{ background: "linear-gradient(135deg,#8b5cf6,#6d28d9)" }}
+      >
+        {user.initials}
+      </div>
+    )}
     <div className="flex-1 min-w-0">
       <p className="text-[20px] font-bold text-gray-900 leading-tight">
         {user.name}
