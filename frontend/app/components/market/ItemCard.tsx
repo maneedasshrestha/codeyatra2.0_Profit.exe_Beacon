@@ -22,6 +22,7 @@ interface ItemCardProps {
   role: Role;
   isNew?: boolean;
   isWishlisted?: boolean;
+  currentUserId?: string;
   onBuy: (item: MarketItem) => void;
   onDelete: (id: string) => void;
   onViewDetail: (item: MarketItem) => void;
@@ -33,6 +34,7 @@ export default function ItemCard({
   role,
   isNew = false,
   isWishlisted = false,
+  currentUserId,
   onBuy,
   onDelete,
   onViewDetail,
@@ -193,17 +195,26 @@ export default function ItemCard({
           </div>
         ) : (
           <div className="mt-auto">
-            <button
-              onClick={() => onDelete(item.id)}
-              className="w-full py-2.5 rounded-2xl font-semibold text-sm active:scale-95 transition-transform"
-              style={{
-                background: "#fef2f2",
-                color: "#ef4444",
-                border: "2px solid #fca5a5",
-              }}
-            >
-              Delete
-            </button>
+            {currentUserId && item.user_id && currentUserId === item.user_id ? (
+              <button
+                onClick={() => onDelete(item.id)}
+                className="w-full py-2.5 rounded-2xl font-semibold text-sm active:scale-95 transition-transform"
+                style={{
+                  background: "#fef2f2",
+                  color: "#ef4444",
+                  border: "2px solid #fca5a5",
+                }}
+              >
+                Delete
+              </button>
+            ) : (
+              <div
+                className="w-full py-2.5 rounded-2xl text-xs text-center font-medium"
+                style={{ color: "#a0a0a0" }}
+              >
+                Listed by {item.sellerName}
+              </div>
+            )}
           </div>
         )}
       </div>

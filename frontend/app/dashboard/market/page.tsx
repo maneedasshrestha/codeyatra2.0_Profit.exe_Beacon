@@ -191,6 +191,7 @@ export default function MarketPage() {
                   role={role}
                   isNew={newlyListed.has(item.id)}
                   isWishlisted={wishlistIds.has(item.id)}
+                  currentUserId={currentUser?.id}
                   onBuy={(item) =>
                     handleBuyClick(item, setBuyTarget, setBuyOpen)
                   }

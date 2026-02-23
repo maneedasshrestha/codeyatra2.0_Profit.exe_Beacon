@@ -2,7 +2,9 @@ import { AddItemForm, MarketItem, Role, Condition, Category } from "./types";
 import { genSeed } from "./mockData";
 import {
   createListing as apiCreateListing,
+  deleteListing as apiDeleteListing,
   ApiListing,
+  getAuthToken,
 } from "../../lib/marketplaceApi";
 
 /** Convert a backend ApiListing into the frontend MarketItem shape */
@@ -77,19 +79,30 @@ export async function handleAddSubmit(
   }
 }
 
-export function handleDelete(
+export async function handleDelete(
   id: string,
   setItems: React.Dispatch<React.SetStateAction<MarketItem[]>>,
   setNewlyListed: React.Dispatch<React.SetStateAction<Set<string>>>,
   setToast: (msg: string | null) => void
 ) {
-  setItems((prev) => prev.filter((it) => it.id !== id));
-  setNewlyListed((prev) => {
-    const s = new Set(prev);
-    s.delete(id);
-    return s;
-  });
-  showToast(setToast, "Item removed");
+  const token = getAuthToken();
+  if (!token) {
+    showToast(setToast, "You must be logged in to delete a listing");
+    return;
+  }
+  try {
+    await apiDeleteListing(id, token);
+    setItems((prev) => prev.filter((it) => it.id !== id));
+    setNewlyListed((prev) => {
+      const s = new Set(prev);
+      s.delete(id);
+      return s;
+    });
+    showToast(setToast, "Item removed");
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to delete listing";
+    showToast(setToast, msg);
+  }
 }
 
 export function handleRoleSwitch(

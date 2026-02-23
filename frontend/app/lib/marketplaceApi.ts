@@ -98,6 +98,24 @@ export interface CreateListingPayload {
   image?: File | null;
 }
 
+/** DELETE /api/marketplace/:id — remove a listing (only the owner can do this) */
+export async function deleteListing(
+  id: string,
+  token: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/marketplace/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error ?? `Delete listing failed: ${res.status}`);
+  }
+}
+
 /** POST /api/marketplace — create a new listing (requires auth) */
 export async function createListing(
   payload: CreateListingPayload,
