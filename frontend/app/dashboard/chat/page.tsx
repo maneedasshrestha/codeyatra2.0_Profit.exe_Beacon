@@ -5,7 +5,7 @@ import ChatList from "../../components/chat/ChatList";
 import ChatConversation from "../../components/chat/ChatConversation";
 import { CHATS_DATA, Message, Chat, User } from "./mockData";
 import { getSocket, disconnectSocket } from "@/lib/socket";
-import { fetchCurrentUser, searchUsers, type CurrentUser } from "@/lib/api";
+import { fetchCurrentUser, searchUsers, fetchConversations, type CurrentUser } from "@/lib/api";
 import type { Socket } from "socket.io-client";
 
 /** Stable AI room key — never collides with UUIDs. */
@@ -59,6 +59,32 @@ const ChatPage = () => {
       // If null, the user is not logged in — let auth redirect handle it
     });
   }, []);
+
+  // ── Step 1b: Load past conversations once we know who the current user is ─
+  useEffect(() => {
+    if (!currentUser) return;
+    fetchConversations().then((convos) => {
+      if (!convos.length) return;
+      setChats((prev) => {
+        const aiChat = prev.find((c) => c.isAi);
+        const existingIds = new Set(prev.map((c) => c.userId).filter(Boolean));
+        // Assign stable numeric IDs starting from 1 (0 is reserved for AI)
+        let nextId = 1;
+        const newChats: Chat[] = convos
+          .filter((co) => !existingIds.has(co.userId))
+          .map((co) => ({
+            id: nextId++,
+            userId: co.userId,
+            name: co.name,
+            initials: co.initials,
+            lastMessage: co.lastMessage,
+            time: co.time,
+            messages: [],
+          }));
+        return aiChat ? [aiChat, ...newChats] : newChats;
+      });
+    });
+  }, [currentUser]);
 
   // ── Step 2: Connect socket once we have the real user identity ────────────
   useEffect(() => {
