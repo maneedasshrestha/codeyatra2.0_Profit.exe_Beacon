@@ -28,6 +28,8 @@ const ChatPage = () => {
 
   /** Room string of the chat where the other person is currently typing. */
   const [typingRoomId, setTypingRoomId] = useState<string | null>(null);
+  /** Rooms whose message history is currently being fetched from the server. */
+  const [loadingRoomIds, setLoadingRoomIds] = useState<Set<string>>(new Set());
 
   /** User search state */
   const [searchResults, setSearchResults] = useState<User[]>([]);
@@ -211,6 +213,11 @@ const ChatPage = () => {
       chatId: string;
       messages: Array<{ id: number; text: string; senderId: string; timestamp: string }>;
     }) => {
+      setLoadingRoomIds((prev) => {
+        const next = new Set(prev);
+        next.delete(chatId);
+        return next;
+      });
       if (!messages.length) return;
       setAllMessages((prev) => ({
         ...prev,
@@ -244,6 +251,7 @@ const ChatPage = () => {
     // We only want to join when the *selected chat* actually changes.
     const chat = chatsRef.current.find((c) => c.id === selectedChatId);
     if (chat && !chat.isAi) {
+      setLoadingRoomIds((prev) => new Set(prev).add(getRoomId(chat)));
       socket.emit("join_chat", { chatId: getRoomId(chat) });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -372,6 +380,7 @@ const ChatPage = () => {
             onSendMessage={handleSocketSend}
             onTyping={handleTyping}
             isTyping={!!selectedRoomId && typingRoomId === selectedRoomId}
+            isMessagesLoading={!!selectedRoomId && loadingRoomIds.has(selectedRoomId)}
             onBack={() => setSelectedChatId(null)}
           />
         </div>
