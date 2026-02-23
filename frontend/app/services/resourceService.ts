@@ -11,6 +11,9 @@ export interface ResourceResponse {
     uploaded_by: string;
     download_count: number;
     upvotes_count: number;
+    downvotes_count: number;
+    has_upvoted?: boolean;
+    has_downvoted?: boolean;
     created_at: string;
     uploader?: {
         id: string;
@@ -59,6 +62,10 @@ export const resourceService = {
 
     toggleUpvote: async (id: string) => {
         return api.post(`/api/resources/${id}/upvote`, {});
+    },
+
+    toggleDownvote: async (id: string) => {
+        return api.post(`/api/resources/${id}/downvote`, {});
     },
 
     deleteResource: async (id: string) => {

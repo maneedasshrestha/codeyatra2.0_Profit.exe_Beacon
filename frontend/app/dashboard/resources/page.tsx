@@ -33,7 +33,7 @@ export default function ResourcesPage() {
 
       // Map backend response to frontend Resource interface
       const mapped: Resource[] = data.resources.map((r: ResourceResponse) => ({
-        id: parseInt(r.id) || Date.now(),
+        id: r.id || Date.now().toString(),
         title: r.title,
         subject: r.subject.toUpperCase(),
         type: r.file_type === "past_paper" ? "Past Papers" : "Notes",
@@ -42,6 +42,10 @@ export default function ResourcesPage() {
         size: "N/A", // API doesn't provide size yet
         course: "Engineering", // Defaulting as API lacks course
         fileUrl: r.file_url,
+        upvotes_count: r.upvotes_count || 0,
+        downvotes_count: r.downvotes_count || 0,
+        has_upvoted: r.has_upvoted || false,
+        has_downvoted: r.has_downvoted || false,
       }));
 
       setResources(mapped);
@@ -55,6 +59,51 @@ export default function ResourcesPage() {
   useEffect(() => {
     fetchResources();
   }, [fetchResources]);
+
+  const handleUpvote = async (id: string) => {
+    // Optimistic Update
+    setResources(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const isRemoving = r.has_upvoted;
+      const wasDownvoted = r.has_downvoted;
+      return {
+        ...r,
+        has_upvoted: !isRemoving,
+        has_downvoted: false,
+        upvotes_count: (r.upvotes_count || 0) + (isRemoving ? -1 : 1),
+        downvotes_count: (r.downvotes_count || 0) + (wasDownvoted ? -1 : 0)
+      };
+    }));
+
+    try {
+      await resourceService.toggleUpvote(id.toString());
+    } catch (err) {
+      // Revert if failed (simplistic revert - fetch again)
+      fetchResources();
+    }
+  };
+
+  const handleDownvote = async (id: string) => {
+    // Optimistic Update
+    setResources(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const isRemoving = r.has_downvoted;
+      const wasUpvoted = r.has_upvoted;
+      return {
+        ...r,
+        has_downvoted: !isRemoving,
+        has_upvoted: false,
+        downvotes_count: (r.downvotes_count || 0) + (isRemoving ? -1 : 1),
+        upvotes_count: (r.upvotes_count || 0) + (wasUpvoted ? -1 : 0)
+      };
+    }));
+
+    try {
+      await resourceService.toggleDownvote(id.toString());
+    } catch (err) {
+      fetchResources();
+    }
+  };
 
   const activeCount = [course, semester, type].filter(
     (v) => v !== "All",
@@ -107,6 +156,8 @@ export default function ResourcesPage() {
                 key={r.id}
                 resource={r}
                 onClick={() => setPreviewResource(r)}
+                onUpvote={handleUpvote}
+                onDownvote={handleDownvote}
               />
             ))
           )}

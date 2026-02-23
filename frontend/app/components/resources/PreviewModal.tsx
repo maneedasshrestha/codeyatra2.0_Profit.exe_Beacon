@@ -33,29 +33,29 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
     <div
       className="fixed inset-0 z-[60] flex flex-col animate-in fade-in zoom-in duration-200"
       style={{
-        background: "rgba(10, 10, 15, 0.95)",
-        backdropFilter: "blur(20px)"
+        background: "rgba(255, 255, 255, 0.96)",
+        backdropFilter: "blur(25px)"
       }}
     >
       {/* Dynamic Background Glow */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-20"
+        className="absolute inset-0 pointer-events-none opacity-40"
         style={{
-          background: `radial-gradient(circle at 50% 50%, ${ts.text} 0%, transparent 70%)`
+          background: `radial-gradient(circle at 50% 50%, ${ts.bg} 0%, transparent 70%)`
         }}
       />
 
       {/* Modern Glass Header */}
       <div
-        className="flex items-center gap-4 px-6 py-4 shrink-0 relative z-10 border-b border-white/10"
+        className="flex items-center gap-4 px-6 py-4 shrink-0 relative z-10 border-b border-gray-100"
         style={{
-          background: "rgba(255, 255, 255, 0.03)",
+          background: "rgba(255, 255, 255, 0.7)",
           backdropFilter: "blur(10px)"
         }}
       >
         <button
           onClick={onClose}
-          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 active:scale-90 transition-all hover:bg-white/10 group"
+          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 active:scale-90 transition-all hover:bg-gray-100 group"
         >
           <svg
             width="20"
@@ -65,29 +65,29 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
             stroke="currentColor"
             strokeWidth="2.5"
             strokeLinecap="round"
-            className="text-white/60 group-hover:text-white"
+            className="text-gray-400 group-hover:text-gray-900"
           >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-[17px] font-bold text-white truncate leading-tight">
+          <h3 className="text-[17px] font-bold text-gray-900 truncate leading-tight">
             {resource.title}
           </h3>
           <div className="flex items-center gap-2 mt-0.5">
             <span
               className="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border"
               style={{
-                background: `${ts.text}20`,
+                background: `${ts.bg}`,
                 color: ts.text,
-                borderColor: `${ts.text}40`
+                borderColor: `${ts.border}`
               }}
             >
               {resource.type}
             </span>
-            <span className="text-[11px] text-white/40 font-medium">
-              By {resource.author} &bull; {resource.size}
+            <span className="text-[11px] text-gray-500 font-medium">
+              By {resource.author} &bull;
             </span>
           </div>
         </div>
@@ -101,7 +101,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
             style={{
               background: "#7c3aed",
               color: "#fff",
-              boxShadow: "0 8px 24px rgba(124, 58, 237, 0.4)",
+              boxShadow: "0 8px 24px rgba(124, 58, 237, 0.25)",
             }}
           >
             <svg
@@ -118,7 +118,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            GET FILE
+
           </a>
         </div>
       </div>
@@ -128,12 +128,12 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
         {loading && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-transparent">
             <div className="w-12 h-12 rounded-full border-t-2 border-r-2 border-violet-500 animate-spin mb-4" />
-            <p className="text-white/40 text-xs font-bold tracking-widest uppercase">Loading Preview...</p>
+            <p className="text-gray-400 text-xs font-bold tracking-widest uppercase">Loading Preview...</p>
           </div>
         )}
 
         {resource.fileUrl ? (
-          <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl relative z-10 bg-black/40 border border-white/5">
+          <div className="w-full h-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl relative z-10 bg-white border border-gray-100">
             {isImage ? (
               <img
                 src={resource.fileUrl}
@@ -153,13 +153,13 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
                 onLoad={() => setLoading(false)}
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center gap-6 p-12 bg-white/[0.02]">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-6 p-12 bg-gray-50/50">
                 <div
                   className="w-24 h-24 rounded-[2.5rem] flex items-center justify-center relative group"
-                  style={{ background: `linear-gradient(135deg, ${ts.text}40, ${ts.text}10)` }}
+                  style={{ background: `linear-gradient(135deg, ${ts.bg}, white)` }}
                 >
                   <div
-                    className="absolute inset-0 rounded-full blur-2xl opacity-30 group-hover:opacity-60 transition-opacity"
+                    className="absolute inset-0 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"
                     style={{ background: ts.text }}
                   />
                   <svg
@@ -179,15 +179,15 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
                   </svg>
                 </div>
                 <div className="text-center max-w-sm">
-                  <h4 className="text-xl font-black text-white mb-2 leading-tight">Preview Unavailable</h4>
-                  <p className="text-white/40 text-sm font-medium leading-relaxed">
+                  <h4 className="text-xl font-black text-gray-900 mb-2 leading-tight">Preview Unavailable</h4>
+                  <p className="text-gray-500 text-sm font-medium leading-relaxed">
                     This file format cannot be rendered directly in the browser. Please download it to view all details.
                   </p>
                   <div className="mt-8 flex items-center justify-center gap-4">
-                    <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-white/50 uppercase tracking-widest">
+                    <span className="px-4 py-1.5 rounded-full bg-white border border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-widest shadow-sm">
                       {resource.semester} SEM
                     </span>
-                    <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-white/50 uppercase tracking-widest">
+                    <span className="px-4 py-1.5 rounded-full bg-white border border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-widest shadow-sm">
                       {resource.subject}
                     </span>
                   </div>
@@ -196,7 +196,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
             )}
           </div>
         ) : (
-          <div className="text-white/20 font-black text-4xl italic tracking-tighter opacity-10 select-none">
+          <div className="text-gray-200 font-black text-4xl italic tracking-tighter opacity-20 select-none">
             RESOURCE NOT FOUND
           </div>
         )}
@@ -205,7 +205,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ resource, onClose }) => {
       {/* Subtle Bottom Accent */}
       <div
         className="h-1.5 w-full shrink-0"
-        style={{ background: `linear-gradient(90deg, transparent, ${ts.text}, transparent)` }}
+        style={{ background: `linear-gradient(90deg, transparent, ${ts.text}40, transparent)` }}
       />
     </div>
   );
