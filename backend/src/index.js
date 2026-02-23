@@ -5,10 +5,20 @@ import postsRouter from "./routes/posts.routes.js";
 import marketplaceRouter from "./routes/marketplace.routes.js";
 import resourceRouter from "./routes/resource.routes.js";
 import { getFeed } from "./controllers/posts.controllers.js";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+const corsOptions = {
+  origin: process.env.CLIENT_URL || "*",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
 
+app.use(cors(corsOptions));
+app.options("*", corsOptions);
 app.use("/auth", authroutes);
 
 app.get("/test", (req, res) => {
