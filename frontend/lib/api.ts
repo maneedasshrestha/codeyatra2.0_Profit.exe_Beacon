@@ -70,6 +70,35 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
   }
 }
 
+export interface ConversationSummary {
+  roomId: string;
+  userId: string;
+  name: string;
+  initials: string;
+  role: string | null;
+  lastMessage: string;
+  lastMessageSenderId: string | null;
+  time: string;
+  updatedAt: string;
+}
+
+/**
+ * Fetches all recent conversations for the current user.
+ * Calls GET /api/chat/conversations
+ */
+export async function fetchConversations(): Promise<ConversationSummary[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/chat/conversations`, {
+      headers: { "Content-Type": "application/json", ...authHeader() },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.conversations ?? [];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Searches for platform users by name fragment.
  * Calls GET /auth/users/search?q=<query>
