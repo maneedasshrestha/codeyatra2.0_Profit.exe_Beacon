@@ -230,7 +230,7 @@ export const updateProfile = async (req, res) => {
   if (college) updates.college = college;
   if (stream) updates.stream = stream;
   if (semester) updates.semester = semester;
-  if (role && ["junior", "senior", "both"].includes(role)) updates.role = role;
+  if (role && ["junior", "senior", "alumni"].includes(role)) updates.role = role;
 
   const { data, error } = await supabase
     .from("users")
