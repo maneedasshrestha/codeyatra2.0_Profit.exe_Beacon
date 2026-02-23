@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Smile, Paperclip, ChevronLeft } from "lucide-react";
 import Avatar from "@/app/components/Avatar";
 import { Chat, Message } from "../../dashboard/chat/mockData";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatConversationProps {
     chat: Chat | null;
@@ -227,7 +229,15 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
                                         : "bg-white text-gray-800 rounded-tl-none border border-black/5"
                                         }`}
                                 >
-                                    <p>{msg.text}</p>
+                                    {msg.sender === "them" && chat.isAi ? (
+                                        <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-code:bg-violet-50 prose-code:text-violet-700 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[12px] prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-100 prose-pre:rounded-xl prose-pre:text-[12px] prose-strong:text-gray-900 prose-a:text-violet-600">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {msg.text}
+                                            </ReactMarkdown>
+                                        </div>
+                                    ) : (
+                                        <p>{msg.text}</p>
+                                    )}
                                     <span
                                         className={`text-[10px] block mt-1.5 font-bold ${msg.sender === "me" ? "text-white/60 text-right" : "text-gray-400"
                                             }`}
