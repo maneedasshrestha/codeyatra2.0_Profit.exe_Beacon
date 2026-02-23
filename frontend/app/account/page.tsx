@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import ProfileHeader from "./components/ProfileHeader";
 import AcademicCard from "./components/AcademicCard";
 import ActionMenu from "./components/ActionMenu";
@@ -25,6 +26,7 @@ const STATS = [
 ];
 
 export default function AccountPage() {
+  const router = useRouter();
   return (
     <div
       className="min-h-screen w-full flex justify-center"
@@ -141,6 +143,7 @@ export default function AccountPage() {
               {
                 label: "Sign Out",
                 danger: true,
+                onClick: () => router.push("/setup/login"),
                 icon: (
                   <svg
                     width="16"
