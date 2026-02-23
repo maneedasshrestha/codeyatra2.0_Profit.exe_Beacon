@@ -39,8 +39,30 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    router.push("/dashboard/home");
+
+    try {
+      const res = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, password: form.password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({ email: data.error || "Login failed" });
+        setLoading(false);
+        return;
+      }
+
+      const token = data.token || data.session?.access_token;
+      localStorage.setItem("auth_token", token);
+      router.push("/dashboard/home");
+    } catch {
+      setErrors({ email: "Network error. Please try again." });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
