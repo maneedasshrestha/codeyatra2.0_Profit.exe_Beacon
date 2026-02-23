@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";
 import {
   signup,
   login,
@@ -6,9 +7,15 @@ import {
   authCodeError,
   logout,
   getMe,
-  completeProfile, // ← ADD THIS
+  completeProfile,
   updateProfile,
+  uploadAvatar,
 } from "../controllers/user-auth.controllers.js";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 const router = express.Router();
 
@@ -35,5 +42,8 @@ router.post("/complete-profile", completeProfile);
 
 // ✨ 7. UPDATE PROFILE (NEW)
 router.put("/update-profile", updateProfile);
+
+// ✨ 8. UPLOAD AVATAR
+router.post("/upload-avatar", upload.single("avatar"), uploadAvatar);
 
 export default router;
