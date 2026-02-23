@@ -24,23 +24,12 @@ const calculateScore = (resource) => {
 // ─────────────────────────────────────────────
 export const uploadResource = async (req, res) => {
   console.log("=== UPLOAD RESOURCE DEBUG ===");
-  console.log("Authorization header:", req.headers.authorization);
   console.log("req.body:", req.body);
   console.log("req.file:", req.file);
   console.log("Has file:", !!req.file);
 
   const supabase = createClient({ req, res });
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  console.log("User:", user);
-  console.log("Auth error:", authError);
-
-  if (authError || !user)
-    return res.status(401).json({ error: "Unauthorized", details: authError });
+  const user = req.user;
 
   const { title, description, subject, semester, file_type } = req.body;
   const file = req.file;
@@ -250,13 +239,7 @@ export const getResourceById = async (req, res) => {
 export const toggleUpvote = async (req, res) => {
   const supabase = createClient({ req, res });
   const { id } = req.params;
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-  if (authError || !user)
-    return res.status(401).json({ error: "Unauthorized" });
+  const user = req.user;
 
   // Check for existing upvote
   const { data: existing } = await supabase
@@ -293,13 +276,7 @@ export const toggleUpvote = async (req, res) => {
 export const deleteResource = async (req, res) => {
   const supabase = createClient({ req, res });
   const { id } = req.params;
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-  if (authError || !user)
-    return res.status(401).json({ error: "Unauthorized" });
+  const user = req.user;
 
   const { data: resource } = await supabase
     .from("resources")
