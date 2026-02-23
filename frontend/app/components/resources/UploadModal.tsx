@@ -1,14 +1,14 @@
 import React, { useRef, useState } from "react";
 import {
-  Resource,
   COURSES,
   SEMESTERS,
   TYPES,
 } from "../../dashboard/resources/mockData";
+import { resourceService } from "../../services/resourceService";
 
 interface UploadModalProps {
   onClose: () => void;
-  onUpload: (r: Resource) => void;
+  onUpload: () => void;
 }
 
 const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
@@ -21,21 +21,47 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
     course: "Engineering",
   });
   const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.title.trim() || !form.subject.trim() || !file) return;
-    onUpload({
-      id: Date.now(),
-      title: form.title.trim(),
-      subject: form.subject.trim().toUpperCase(),
-      type: form.type,
-      author: "You",
-      semester: form.semester,
-      course: form.course,
-      size: `${(file.size / 1024).toFixed(0)} KB`,
-    });
-    onClose();
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("title", form.title.trim());
+      formData.append("subject", form.subject.trim());
+      formData.append("file", file);
+
+      // Map semester (e.g. "1st") to number (1)
+      const semInt = form.semester.replace(/\D/g, "");
+      formData.append("semester", semInt);
+
+      // Map frontend type to backend file_type
+      const typeMap: Record<string, string> = {
+        "Notes": "notes",
+        "Past Papers": "past_paper",
+        "Lab Report": "notes",
+        "Cheatsheet": "notes",
+      };
+      formData.append("file_type", typeMap[form.type] || "notes");
+
+      // Since backend doesn't have course yet, we could put it in description or ignore
+      formData.append("description", `Course: ${form.course}`);
+
+      await resourceService.uploadResource(formData);
+      onUpload();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || "Failed to upload resource");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -58,6 +84,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
           </h2>
           <button
             onClick={onClose}
+            disabled={uploading}
             className="w-8 h-8 rounded-full flex items-center justify-center"
             style={{ background: "#f3f4f6" }}
           >
@@ -76,9 +103,16 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
           </button>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-500 text-xs font-medium border border-red-100">
+            {error}
+          </div>
+        )}
+
         <button
-          onClick={() => fileRef.current?.click()}
-          className="w-full flex flex-col items-center justify-center py-5 rounded-2xl mb-4 transition-all active:scale-[0.98]"
+          onClick={() => !uploading && fileRef.current?.click()}
+          disabled={uploading}
+          className="w-full flex flex-col items-center justify-center py-5 rounded-2xl mb-4 transition-all active:scale-[0.98] disabled:opacity-50"
           style={{
             border: `2px dashed ${file ? "#7c3aed" : "#ddd6fe"}`,
             background: file ? "#f9f5ff" : "#faf9ff",
@@ -122,6 +156,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
             type="text"
             placeholder="e.g. DSA Handwritten Notes"
             value={form.title}
+            disabled={uploading}
             onChange={(e) => set("title", e.target.value)}
             className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none"
             style={{
@@ -143,6 +178,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
               type="text"
               placeholder="e.g. DSA"
               value={form.subject}
+              disabled={uploading}
               onChange={(e) => set("subject", e.target.value)}
               className="w-full px-3 py-3 rounded-xl text-sm font-medium outline-none"
               style={{
@@ -160,6 +196,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
             </label>
             <select
               value={form.course}
+              disabled={uploading}
               onChange={(e) => set("course", e.target.value)}
               className="w-full px-3 py-3 rounded-xl text-sm font-medium outline-none appearance-none"
               style={{
@@ -182,6 +219,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
             </label>
             <select
               value={form.semester}
+              disabled={uploading}
               onChange={(e) => set("semester", e.target.value)}
               className="w-full px-3 py-3 rounded-xl text-sm font-medium outline-none appearance-none"
               style={{
@@ -201,6 +239,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
             </label>
             <select
               value={form.type}
+              disabled={uploading}
               onChange={(e) => set("type", e.target.value)}
               className="w-full px-3 py-3 rounded-xl text-sm font-medium outline-none appearance-none"
               style={{
@@ -218,14 +257,21 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onUpload }) => {
 
         <button
           onClick={handleSubmit}
-          disabled={!form.title.trim() || !form.subject.trim() || !file}
-          className="w-full py-3.5 rounded-2xl font-bold text-white text-[15px] transition-all active:scale-[0.98] disabled:opacity-50"
+          disabled={!form.title.trim() || !form.subject.trim() || !file || uploading}
+          className="w-full py-3.5 rounded-2xl font-bold text-white text-[15px] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
           style={{
             background: "#7c3aed",
             boxShadow: "0 4px 18px rgba(124,58,237,0.3)",
           }}
         >
-          Upload Resource
+          {uploading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              Uploading...
+            </>
+          ) : (
+            "Upload Resource"
+          )}
         </button>
       </div>
     </div>

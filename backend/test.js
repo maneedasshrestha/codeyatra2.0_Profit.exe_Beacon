@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config";
 
-// The client gets the API key from the environment variable `GEMINI_API_KEY`.
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function main() {

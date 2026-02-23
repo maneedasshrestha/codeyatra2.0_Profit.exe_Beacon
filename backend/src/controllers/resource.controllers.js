@@ -10,9 +10,11 @@ const calculateScore = (resource) => {
     (1000 * 60 * 60 * 24);
   const recencyScore = Math.max(0, 30 - recencyDays); // decays to 0 after 30 days
 
+  // Weights: Upvotes (+3), Downvotes (-3), Downloads (+1), Linked Posts (+5)
   return (
-    resource.upvotes_count * 3 +
-    resource.download_count * 1 +
+    (resource.upvotes_count || 0) * 3 -
+    (resource.downvotes_count || 0) * 3 +
+    (resource.download_count || 0) * 1 +
     (resource.linked_posts_count ?? 0) * 5 +
     recencyScore * 0.5
   );
@@ -135,7 +137,9 @@ export const getAllResources = async (req, res) => {
       uploader:users(id, email),
       linked_posts:post_resources(
         post:posts(id, content)
-      )
+      ),
+      resource_upvotes!left(user_id),
+      resource_downvotes!left(user_id)
     `,
     { count: "exact" },
   );
@@ -173,14 +177,24 @@ export const getAllResources = async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch resources" });
   }
 
-  let enriched = resources.map((r) => ({
-    ...r,
-    linked_posts_count: r.linked_posts?.length ?? 0,
-    score: calculateScore({
-      ...r,
-      linked_posts_count: r.linked_posts?.length ?? 0,
-    }),
-  }));
+  let enriched = resources.map((r) => {
+    const has_upvoted = req.user ? r.resource_upvotes?.some(v => v.user_id === req.user.id) : false;
+    const has_downvoted = req.user ? r.resource_downvotes?.some(v => v.user_id === req.user.id) : false;
+
+    // Cleanup the join data
+    const { resource_upvotes, resource_downvotes, ...rest } = r;
+
+    return {
+      ...rest,
+      has_upvoted,
+      has_downvoted,
+      linked_posts_count: rest.linked_posts?.length ?? 0,
+      score: calculateScore({
+        ...rest,
+        linked_posts_count: rest.linked_posts?.length ?? 0,
+      }),
+    };
+  });
 
   if (sort === "ranked") {
     enriched = enriched.sort((a, b) => b.score - a.score);
@@ -213,7 +227,9 @@ export const getResourceById = async (req, res) => {
       uploader:users(id, email),
       linked_posts:post_resources(
         post:posts(id, content, created_at)
-      )
+      ),
+      resource_upvotes!left(user_id),
+      resource_downvotes!left(user_id)
     `,
     )
     .eq("id", id)
@@ -228,8 +244,17 @@ export const getResourceById = async (req, res) => {
     .update({ download_count: resource.download_count + 1 })
     .eq("id", id);
 
+  const has_upvoted = req.user ? resource.resource_upvotes?.some(v => v.user_id === req.user.id) : false;
+  const has_downvoted = req.user ? resource.resource_downvotes?.some(v => v.user_id === req.user.id) : false;
+  const { resource_upvotes, resource_downvotes, ...rest } = resource;
+
   res.json({
-    resource: { ...resource, download_count: resource.download_count + 1 },
+    resource: {
+      ...rest,
+      download_count: rest.download_count + 1,
+      has_upvoted,
+      has_downvoted
+    },
   });
 };
 
@@ -241,32 +266,122 @@ export const toggleUpvote = async (req, res) => {
   const { id } = req.params;
   const user = req.user;
 
-  // Check for existing upvote
-  const { data: existing } = await supabase
+  // 1. Check for existing upvote
+  const { data: existingUpvote } = await supabase
     .from("resource_upvotes")
     .select("id")
     .eq("resource_id", id)
     .eq("user_id", user.id)
     .single();
 
-  if (existing) {
+  if (existingUpvote) {
     // Remove upvote
-    await supabase.from("resource_upvotes").delete().eq("id", existing.id);
-    await supabase.rpc("decrement_resource_upvotes", { resource_id: id });
+    await supabase.from("resource_upvotes").delete().eq("id", existingUpvote.id);
+    const { error: rpcError } = await supabase.rpc("decrement_resource_upvotes", { resource_id: id });
+    if (rpcError) {
+      console.error("RPC decrement_resource_upvotes error:", rpcError);
+      return res.status(500).json({ error: "Failed to update upvote count", details: rpcError.message });
+    }
     return res.json({ message: "Upvote removed", upvoted: false });
   }
 
-  // Add upvote
+  // 2. Check and remove downvote if exists
+  const { data: existingDownvote } = await supabase
+    .from("resource_downvotes")
+    .select("id")
+    .eq("resource_id", id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (existingDownvote) {
+    await supabase.from("resource_downvotes").delete().eq("id", existingDownvote.id);
+    const { error: rpcError } = await supabase.rpc("decrement_resource_downvotes", { resource_id: id });
+    if (rpcError) {
+      console.error("RPC decrement_resource_downvotes error:", rpcError);
+      // We don't necessarily return 500 here since the main logic is upvoting, but it's a warning state
+    }
+  }
+
+  // 3. Add upvote
   const { error: insertError } = await supabase
     .from("resource_upvotes")
     .insert({ resource_id: id, user_id: user.id });
 
-  if (insertError)
-    return res.status(500).json({ error: "Failed to upvote resource" });
+  if (insertError) {
+    console.error("Upvote insert error:", insertError);
+    return res.status(500).json({ error: "Failed to upvote resource", details: insertError.message });
+  }
 
-  await supabase.rpc("increment_resource_upvotes", { resource_id: id });
+  const { error: rpcError } = await supabase.rpc("increment_resource_upvotes", { resource_id: id });
+  if (rpcError) {
+    console.error("RPC increment_resource_upvotes error:", rpcError);
+    return res.status(500).json({ error: "Failed to increment upvote count", details: rpcError.message });
+  }
 
-  res.json({ message: "Upvoted successfully", upvoted: true });
+  res.json({ message: "Upvoted successfully", upvoted: true, downvotedRemoved: !!existingDownvote });
+};
+
+// ─────────────────────────────────────────────
+// 5. TOGGLE DOWNVOTE  →  POST /api/resources/:id/downvote
+// ─────────────────────────────────────────────
+export const toggleDownvote = async (req, res) => {
+  const supabase = createClient({ req, res });
+  const { id } = req.params;
+  const user = req.user;
+
+  // 1. Check for existing downvote
+  const { data: existingDownvote } = await supabase
+    .from("resource_downvotes")
+    .select("id")
+    .eq("resource_id", id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (existingDownvote) {
+    // Remove downvote
+    await supabase.from("resource_downvotes").delete().eq("id", existingDownvote.id);
+    const { error: rpcError } = await supabase.rpc("decrement_resource_downvotes", { resource_id: id });
+    if (rpcError) {
+      console.error("RPC decrement_resource_downvotes error:", rpcError);
+      return res.status(500).json({ error: "Failed to update downvote count", details: rpcError.message });
+    }
+    return res.json({ message: "Downvote removed", downvoted: false });
+  }
+
+  // 2. Check and remove upvote if exists
+  const { data: existingUpvote } = await supabase
+    .from("resource_upvotes")
+    .select("id")
+    .eq("resource_id", id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (existingUpvote) {
+    await supabase.from("resource_upvotes").delete().eq("id", existingUpvote.id);
+    const { error: rpcError } = await supabase.rpc("decrement_resource_upvotes", { resource_id: id });
+    if (rpcError) {
+      console.error("RPC decrement_resource_upvotes error:", rpcError);
+      // Warning state
+    }
+  }
+
+  // 3. Add downvote
+  const { error: insertError } = await supabase
+    .from("resource_downvotes")
+    .insert({ resource_id: id, user_id: user.id });
+
+  if (insertError) {
+    console.error("Downvote insert error:", insertError);
+    return res.status(500).json({ error: "Failed to downvote resource", details: insertError.message });
+  }
+
+  const { error: rpcError } = await supabase.rpc("increment_resource_downvotes", { resource_id: id });
+  if (rpcError) {
+    console.error("RPC increment_resource_downvotes error:", rpcError);
+    return res.status(500).json({ error: "Failed to increment downvote count", details: rpcError.message });
+  }
+
+  res.json({ message: "Downvoted successfully", downvoted: true, upvoteRemoved: !!existingUpvote });
 };
 
 // ─────────────────────────────────────────────
