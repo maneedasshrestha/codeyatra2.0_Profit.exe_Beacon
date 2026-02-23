@@ -6,6 +6,7 @@ import authroutes from "./routes/user-auth.route.js";
 import postsRouter from "./routes/posts.routes.js";
 import marketplaceRouter from "./routes/marketplace.routes.js";
 import resourceRouter from "./routes/resource.routes.js";
+import commentsRouter from "./routes/comments.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import chatRouter from "./routes/chat.routes.js";
 import { getFeed } from "./controllers/posts.controllers.js";
@@ -68,6 +69,7 @@ app.get("/test", (req, res) => {
 });
 
 app.use("/api/posts", postsRouter);
+app.use("/api/comments", commentsRouter);
 app.use("/api/marketplace", marketplaceRouter);
 app.use("/api/resources", resourceRouter);
 app.use("/api/ai", aiRoutes);
