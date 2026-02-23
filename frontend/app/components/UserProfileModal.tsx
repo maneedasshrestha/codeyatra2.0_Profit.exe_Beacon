@@ -87,7 +87,7 @@ export default function UserProfileModal({
             <X size={16} className="text-gray-500" />
           </button>
 
-          <div className="px-6 pt-4 pb-8">
+          <div className="px-6 pt-4 pb-36">
             {/* Avatar + Name */}
             <div className="flex flex-col items-center mb-6">
               <div
