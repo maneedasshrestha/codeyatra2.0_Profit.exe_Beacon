@@ -159,9 +159,9 @@ export const completeProfile = async (req, res) => {
   }
 
   // Validate role
-  if (!["junior", "senior", "both"].includes(role)) {
+  if (!["junior", "senior", "alumni"].includes(role)) {
     return res.status(400).json({
-      error: "Role must be one of: junior, senior, both",
+      error: "Role must be one of: junior, senior, alumni",
     });
   }
 
