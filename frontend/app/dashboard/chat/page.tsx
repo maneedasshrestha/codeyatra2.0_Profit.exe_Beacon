@@ -1,48 +1,287 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import ChatList from "../../components/chat/ChatList";
 import ChatConversation from "../../components/chat/ChatConversation";
-import { CHATS_DATA } from "./mockData";
+import { CHATS_DATA, Message, Chat, User } from "./mockData";
+import { getSocket, disconnectSocket } from "@/lib/socket";
+import { fetchCurrentUser, searchUsers, type CurrentUser } from "@/lib/api";
+import type { Socket } from "socket.io-client";
+
+/** Stable AI room key — never collides with UUIDs. */
+const AI_ROOM = "ai-0";
 
 const ChatPage = () => {
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null); // Default to list view
-  const [allMessages, setAllMessages] = useState<{ [key: number]: any[] }>(
-    CHATS_DATA.reduce((acc, chat) => {
-      acc[chat.id] = chat.messages;
-      return acc;
-    }, {} as { [key: number]: any[] })
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+  const [chats, setChats] = useState<Chat[]>(CHATS_DATA);
+
+  /**
+   * Messages are keyed by ROOM STRING (e.g. "uuid1--uuid2"), not by chat.id.
+   * This matches what the socket server emits as `chatId`.
+   */
+  const [allMessages, setAllMessages] = useState<{ [roomId: string]: Message[] }>({
+    [AI_ROOM]: CHATS_DATA[0].messages,
+  });
+
+  /** Room string of the chat where the other person is currently typing. */
+  const [typingRoomId, setTypingRoomId] = useState<string | null>(null);
+
+  /** User search state */
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearchFetching, setIsSearchFetching] = useState(false);
+
+  const socketRef = useRef<Socket | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * Derives the deterministic private room ID for any chat.
+   * Sorting the two UUIDs ensures both participants always compute the same string.
+   */
+  const getRoomId = useCallback(
+    (chat: Chat): string => {
+      if (chat.isAi) return AI_ROOM;
+      if (chat.userId && currentUser?.id) {
+        return [currentUser.id, chat.userId].sort().join("--");
+      }
+      return String(chat.id); // fallback
+    },
+    [currentUser]
   );
 
-  const selectedChat = CHATS_DATA.find((c) => c.id === selectedChatId) || null;
-  const selectedMessages = selectedChatId !== null ? allMessages[selectedChatId] : [];
+  // ── Step 1: Load real current user from backend ──────────────────────────
+  useEffect(() => {
+    fetchCurrentUser().then((user) => {
+      if (user) {
+        setCurrentUser(user);
+      }
+      // If null, the user is not logged in — let auth redirect handle it
+    });
+  }, []);
 
-  const handleUpdateMessages = (chatId: number, newMessages: any[]) => {
-    setAllMessages((prev) => ({
-      ...prev,
-      [chatId]: newMessages,
-    }));
-  };
+  // ── Step 2: Connect socket once we have the real user identity ────────────
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // Re-create socket with real identity
+    disconnectSocket();
+    const socket = getSocket(currentUser.id, currentUser.name);
+    socketRef.current = socket;
+
+    if (!socket.connected) socket.connect();
+
+    /** New message broadcast — chatId is the room string from the server. */
+    const onReceiveMessage = (msg: {
+      id: number;
+      chatId: string;
+      text: string;
+      senderId: string;
+      timestamp: string;
+    }) => {
+      setAllMessages((prev) => {
+        const existing = prev[msg.chatId] ?? [];
+        if (existing.some((m) => m.id === msg.id)) return prev; // deduplicate
+        return {
+          ...prev,
+          [msg.chatId]: [
+            ...existing,
+            {
+              id: msg.id,
+              text: msg.text,
+              sender: msg.senderId === currentUser.id ? "me" : "them",
+              timestamp: msg.timestamp,
+            },
+          ],
+        };
+      });
+
+      // Update the chat's lastMessage preview
+      setChats((prev) =>
+        prev.map((c) => {
+          const roomId = c.isAi
+            ? AI_ROOM
+            : c.userId && currentUser?.id
+            ? [currentUser.id, c.userId].sort().join("--")
+            : String(c.id);
+          if (roomId !== msg.chatId) return c;
+          return { ...c, lastMessage: msg.text, time: msg.timestamp };
+        })
+      );
+    };
+
+    /** Typing indicator — chatId is the room string. */
+    const onUserTyping = ({ chatId }: { chatId: string }) => {
+      setTypingRoomId(chatId);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => setTypingRoomId(null), 3000);
+    };
+
+    const onUserStopTyping = ({ chatId }: { chatId: string }) => {
+      setTypingRoomId((prev) => (prev === chatId ? null : prev));
+    };
+
+    /** History loaded from server after join_chat — chatId is the room string. */
+    const onChatHistory = ({
+      chatId,
+      messages,
+    }: {
+      chatId: string;
+      messages: Array<{ id: number; text: string; senderId: string; timestamp: string }>;
+    }) => {
+      if (!messages.length) return;
+      setAllMessages((prev) => ({
+        ...prev,
+        [chatId]: messages.map((m) => ({
+          id: m.id,
+          text: m.text,
+          sender: m.senderId === currentUser.id ? "me" : "them",
+          timestamp: m.timestamp,
+        })),
+      }));
+    };
+
+    socket.on("receive_message", onReceiveMessage);
+    socket.on("user_typing", onUserTyping);
+    socket.on("user_stop_typing", onUserStopTyping);
+    socket.on("chat_history", onChatHistory);
+
+    return () => {
+      socket.off("receive_message", onReceiveMessage);
+      socket.off("user_typing", onUserTyping);
+      socket.off("user_stop_typing", onUserStopTyping);
+      socket.off("chat_history", onChatHistory);
+    };
+  }, [currentUser]);
+
+  // ── Step 3: Join / leave room when selected chat changes ─────────────────
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket || selectedChatId === null) return;
+    const chat = chats.find((c) => c.id === selectedChatId);
+    if (chat && !chat.isAi) {
+      socket.emit("join_chat", { chatId: getRoomId(chat) });
+    }
+  }, [selectedChatId, chats, getRoomId]);
+
+  // ── Derived values ────────────────────────────────────────────────────────
+  const selectedChat = chats.find((c) => c.id === selectedChatId) ?? null;
+  const selectedRoomId = selectedChat ? getRoomId(selectedChat) : null;
+  const selectedMessages = selectedRoomId ? (allMessages[selectedRoomId] ?? []) : [];
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
+
+  const handleSocketSend = useCallback(
+    (text: string) => {
+      if (!selectedChat) return;
+      socketRef.current?.emit("send_message", {
+        chatId: getRoomId(selectedChat),
+        text,
+        senderId: currentUser?.id ?? "anonymous",
+        senderName: currentUser?.name ?? "User",
+      });
+    },
+    [selectedChat, getRoomId, currentUser]
+  );
+
+  const handleTyping = useCallback(
+    (isTyping: boolean) => {
+      if (!selectedChat) return;
+      const event = isTyping ? "typing" : "stop_typing";
+      socketRef.current?.emit(event, {
+        chatId: getRoomId(selectedChat),
+        senderId: currentUser?.id ?? "anonymous",
+      });
+    },
+    [selectedChat, getRoomId, currentUser]
+  );
+
+  /** Debounced backend user search — called by ChatList on every keystroke. */
+  const handleSearchChange = useCallback((q: string) => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (!q.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearchFetching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      const results = await searchUsers(q);
+      // Exclude users already in the chat list
+      const existingIds = new Set(chats.map((c) => c.userId).filter(Boolean));
+      setSearchResults(results.filter((u) => !existingIds.has(u.id)));
+      setIsSearchFetching(false);
+    }, 300);
+  }, [chats]);
+
+  /** Start a new 1-on-1 chat with a user from search results. */
+  const handleStartNewChat = useCallback(
+    (user: User) => {
+      const existing = chats.find((c) => c.userId === user.id);
+      if (existing) {
+        setSelectedChatId(existing.id);
+        return;
+      }
+      const newId = Date.now();
+      const newChat: Chat = {
+        id: newId,
+        userId: user.id,
+        name: user.name,
+        initials: user.initials,
+        online: user.online,
+        lastMessage: "Say hello!",
+        time: "Now",
+        messages: [],
+      };
+      setChats((prev) => [...prev, newChat]);
+      setAllMessages((prev) => ({ ...prev, [`${newId}`]: [] }));
+      setSelectedChatId(newId);
+    },
+    [chats]
+  );
+
+  /** Used only for AI chat where messages are managed locally. */
+  const handleUpdateMessages = useCallback(
+    (roomId: string, newMessages: Message[]) => {
+      setAllMessages((prev) => ({ ...prev, [roomId]: newMessages }));
+    },
+    []
+  );
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Container for Desktop */}
       <div className="flex w-full overflow-hidden relative">
         {/* Sidebar */}
-        <div className={`w-full md:w-95 shrink-0 h-full ${selectedChatId !== null ? "hidden md:flex" : "flex"}`}>
+        <div
+          className={`w-full md:w-95 shrink-0 h-full ${
+            selectedChatId !== null ? "hidden md:flex" : "flex"
+          }`}
+        >
           <ChatList
-            chats={CHATS_DATA}
+            chats={chats}
             selectedChatId={selectedChatId}
             onSelectChat={setSelectedChatId}
+            searchResults={searchResults}
+            onSearchChange={handleSearchChange}
+            isSearching={isSearchFetching}
+            onStartNewChat={handleStartNewChat}
           />
         </div>
 
         {/* Conversation Area */}
-        <div className={`flex-1 h-full ${selectedChatId === null ? "hidden md:flex" : "flex"} relative`}>
+        <div
+          className={`flex-1 h-full ${
+            selectedChatId === null ? "hidden md:flex" : "flex"
+          } relative`}
+        >
           <ChatConversation
             chat={selectedChat}
             messages={selectedMessages}
-            onUpdateMessages={(newMsgs) => selectedChatId !== null && handleUpdateMessages(selectedChatId, newMsgs)}
+            onUpdateMessages={(newMsgs) =>
+              selectedRoomId && handleUpdateMessages(selectedRoomId, newMsgs)
+            }
+            onSendMessage={handleSocketSend}
+            onTyping={handleTyping}
+            isTyping={!!selectedRoomId && typingRoomId === selectedRoomId}
             onBack={() => setSelectedChatId(null)}
           />
         </div>
