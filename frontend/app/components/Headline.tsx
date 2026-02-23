@@ -22,7 +22,7 @@ export default function Headline() {
         className="text-[13px] mt-1 leading-relaxed max-w-70"
         style={{ color: "#9ca3af" }}
       >
-        Notes, marketplace &amp; more — built for students, by students.
+        Notes, marketplace & more — built for students, by students.
       </p>
     </div>
   );
