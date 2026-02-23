@@ -2,10 +2,11 @@ import supabase from "../utils/supabase.js";
 
 // POST /posts
 export const createPost = async (req, res) => {
-  const { user_id, content, college, semester } = req.body;
+  const user_id = req.user.id;
+  const { content, college, semester } = req.body;
 
-  if (!user_id || !content || !college || !semester) {
-    return res.status(400).json({ error: "user_id, content, college, and semester are required" });
+  if (!content || !college || !semester) {
+    return res.status(400).json({ error: "content, college, and semester are required" });
   }
 
   const { data, error } = await supabase
@@ -86,11 +87,8 @@ export const getFeed = async (req, res) => {
 // POST /posts/:id/upvote
 export const upvotePost = async (req, res) => {
   const { id: post_id } = req.params;
-  const { user_id } = req.body;
+  const user_id = req.user.id;
 
-  if (!user_id) {
-    return res.status(400).json({ error: "user_id is required" });
-  }
 
   // Check if already upvoted
   const { data: existing } = await supabase
