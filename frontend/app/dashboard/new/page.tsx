@@ -20,7 +20,12 @@ type Visibility = "public" | "batch";
 
 export default function NewPostPage() {
   const router = useRouter();
-  const [user, setUser] = useState({ name: "", batch: "", initials: "", avatarUrl: "" });
+  const [user, setUser] = useState({
+    name: "",
+    batch: "",
+    initials: "",
+    avatarUrl: "",
+  });
   const [userProfile, setUserProfile] = useState<any>(null);
   const [postType, setPostType] = useState<PostType>("discussion");
   const [title, setTitle] = useState("");
