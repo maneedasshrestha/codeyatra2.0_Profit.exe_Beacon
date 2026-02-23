@@ -19,8 +19,7 @@ app.use(express.json());
 // List of allowed origins
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  "http://localhost:3000",
-  "http://localhost:3000/",
+  "http://localhost:3000","http://localhost:3000/",
 ].filter(Boolean);
 
 const corsOptions = {
