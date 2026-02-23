@@ -1,7 +1,8 @@
 ﻿"use client";
 
-import { useState } from "react";
-import { Resource, SEED } from "./mockData";
+import { useState, useEffect, useCallback } from "react";
+import { Resource } from "./mockData";
+import { resourceService, ResourceResponse } from "../../services/resourceService";
 import UploadModal from "../../components/resources/UploadModal";
 import PreviewModal from "../../components/resources/PreviewModal";
 import ResourceHeader from "../../components/resources/ResourceHeader";
@@ -10,19 +11,50 @@ import ResourceListItem from "../../components/resources/ResourceListItem";
 import UploadFAB from "../../components/resources/UploadFAB";
 
 export default function ResourcesPage() {
-  const [resources, setResources] = useState<Resource[]>(SEED);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [course, setCourse] = useState("All");
   const [semester, setSemester] = useState("All");
   const [type, setType] = useState("All");
   const [showUpload, setShowUpload] = useState(false);
   const [previewResource, setPreviewResource] = useState<Resource | null>(null);
 
-  const visible = resources.filter(
-    (r) =>
-      (course === "All" || r.course === course) &&
-      (semester === "All" || r.semester === semester) &&
-      (type === "All" || r.type === type),
-  );
+  const fetchResources = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await resourceService.getResources({
+        type,
+        semester,
+        // subject: course !== "All" ? course : undefined, // Mapping course to subject for now if backend lacks course
+      });
+
+      // Map backend response to frontend Resource interface
+      const mapped: Resource[] = data.resources.map((r: ResourceResponse) => ({
+        id: parseInt(r.id) || Date.now(),
+        title: r.title,
+        subject: r.subject.toUpperCase(),
+        type: r.file_type === "past_paper" ? "Past Papers" : "Notes",
+        author: r.uploader?.email?.split("@")[0] || "Anonymous",
+        semester: `${r.semester}${["st", "nd", "rd"][r.semester - 1] || "th"}`,
+        size: "N/A", // API doesn't provide size yet
+        course: "Engineering", // Defaulting as API lacks course
+        fileUrl: r.file_url,
+      }));
+
+      setResources(mapped);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [type, semester]);
+
+  useEffect(() => {
+    fetchResources();
+  }, [fetchResources]);
 
   const activeCount = [course, semester, type].filter(
     (v) => v !== "All",
@@ -43,7 +75,7 @@ export default function ResourcesPage() {
           setSemester={setSemester}
           setType={setType}
           activeCount={activeCount}
-          visibleCount={visible.length}
+          visibleCount={resources.length}
           onClear={() => {
             setCourse("All");
             setSemester("All");
@@ -53,14 +85,31 @@ export default function ResourcesPage() {
 
         {/* Resource list */}
         <div className="flex flex-col gap-3 px-4 mt-3">
-          {visible.length === 0 && <ResourceEmptyState />}
-          {visible.map((r) => (
-            <ResourceListItem
-              key={r.id}
-              resource={r}
-              onClick={() => setPreviewResource(r)}
-            />
-          ))}
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-10 text-red-500 font-medium">
+              {error}
+              <button
+                onClick={fetchResources}
+                className="block mx-auto mt-2 text-violet-600 underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : resources.length === 0 ? (
+            <ResourceEmptyState />
+          ) : (
+            resources.map((r) => (
+              <ResourceListItem
+                key={r.id}
+                resource={r}
+                onClick={() => setPreviewResource(r)}
+              />
+            ))
+          )}
         </div>
 
         {/* Upload FAB */}
@@ -70,7 +119,7 @@ export default function ResourcesPage() {
       {showUpload && (
         <UploadModal
           onClose={() => setShowUpload(false)}
-          onUpload={(r) => setResources((prev) => [r, ...prev])}
+          onUpload={() => fetchResources()}
         />
       )}
       {previewResource && (
