@@ -34,6 +34,9 @@ const ChatPage = () => {
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Always holds the latest chats without causing effect re-runs. */
+  const chatsRef = useRef<Chat[]>(chats);
+  useEffect(() => { chatsRef.current = chats; }, [chats]);
 
   /**
    * Derives the deterministic private room ID for any chat.
@@ -67,11 +70,13 @@ const ChatPage = () => {
       if (!convos.length) return;
       setChats((prev) => {
         const aiChat = prev.find((c) => c.isAi);
-        const existingIds = new Set(prev.map((c) => c.userId).filter(Boolean));
-        // Assign stable numeric IDs starting from 1 (0 is reserved for AI)
-        let nextId = 1;
+        // Keep all existing non-AI chats (preserves manually-started ones)
+        const existingNonAi = prev.filter((c) => !c.isAi);
+        const existingUserIds = new Set(existingNonAi.map((c) => c.userId).filter(Boolean));
+        // Only add conversations that aren't already present
+        let nextId = Math.max(1, ...existingNonAi.map((c) => c.id)) + 1;
         const newChats: Chat[] = convos
-          .filter((co) => !existingIds.has(co.userId))
+          .filter((co) => !existingUserIds.has(co.userId))
           .map((co) => ({
             id: nextId++,
             userId: co.userId,
@@ -81,7 +86,7 @@ const ChatPage = () => {
             time: co.time,
             messages: [],
           }));
-        return aiChat ? [aiChat, ...newChats] : newChats;
+        return aiChat ? [aiChat, ...existingNonAi, ...newChats] : [...existingNonAi, ...newChats];
       });
     });
   }, [currentUser]);
@@ -198,11 +203,14 @@ const ChatPage = () => {
   useEffect(() => {
     const socket = socketRef.current;
     if (!socket || selectedChatId === null) return;
-    const chat = chats.find((c) => c.id === selectedChatId);
+    // Use chatsRef to avoid re-running this effect on every chat list reorder.
+    // We only want to join when the *selected chat* actually changes.
+    const chat = chatsRef.current.find((c) => c.id === selectedChatId);
     if (chat && !chat.isAi) {
       socket.emit("join_chat", { chatId: getRoomId(chat) });
     }
-  }, [selectedChatId, chats, getRoomId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedChatId, getRoomId]);
 
   // ── Derived values ────────────────────────────────────────────────────────
   const selectedChat = chats.find((c) => c.id === selectedChatId) ?? null;
