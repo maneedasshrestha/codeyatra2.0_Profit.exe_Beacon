@@ -15,6 +15,8 @@ const EMPTY: AddItemForm = {
   sellerName: "",
   condition: "Good",
   location: "",
+  category: "",
+  image: null,
 };
 
 export default function AddItemModal({
@@ -37,7 +39,7 @@ export default function AddItemModal({
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0)
       e.price = "Enter a valid price";
     if (!form.sellerName.trim()) e.sellerName = "Your name is required";
-    if (!form.location.trim()) e.location = "Location is required";
+    if (!form.location.trim()) e.location = "College / location is required";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -249,14 +251,14 @@ export default function AddItemModal({
                 </select>
               </div>
 
-              {/* Location */}
+              {/* Location / College */}
               <div>
                 <label className="text-xs font-semibold text-violet-600 mb-1 block">
-                  Location
+                  College / Location
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Mumbai, MH"
+                  placeholder="e.g. IIT Bombay or Mumbai, MH"
                   value={form.location}
                   onChange={(e) =>
                     setForm({ ...form, location: e.target.value })
@@ -278,6 +280,74 @@ export default function AddItemModal({
                   <p className="text-xs text-red-400 mt-1">{errors.location}</p>
                 )}
               </div>
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="text-xs font-semibold text-violet-600 mb-1 block">
+                Category
+              </label>
+              <select
+                value={form.category}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    category: e.target.value as AddItemForm["category"],
+                  })
+                }
+                className="w-full px-4 py-3 rounded-2xl border-2 text-sm font-medium outline-none transition-colors appearance-none"
+                style={{
+                  borderColor: "#ddd6fe",
+                  background: "#faf5ff",
+                  color: form.category ? "#1e1b4b" : "#9ca3af",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#8b5cf6")}
+                onBlur={(e) => (e.target.style.borderColor = "#ddd6fe")}
+              >
+                <option value="">Select a category (optional)</option>
+                {[
+                  "Electronics",
+                  "Clothing",
+                  "Books",
+                  "Stationery",
+                  "Furniture",
+                  "Sports",
+                  "Food",
+                  "Other",
+                ].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="text-xs font-semibold text-violet-600 mb-1 block">
+                Photo (optional, max 5 MB)
+              </label>
+              <label
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl border-2 cursor-pointer transition-colors"
+                style={{ borderColor: "#ddd6fe", background: "#faf5ff" }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span className="text-sm font-medium" style={{ color: form.image ? "#1e1b4b" : "#9ca3af" }}>
+                  {form.image ? form.image.name : "Choose image…"}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) =>
+                    setForm({ ...form, image: e.target.files?.[0] ?? null })
+                  }
+                />
+              </label>
             </div>
 
             <button
