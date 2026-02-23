@@ -122,9 +122,9 @@ const ChatPage = () => {
         };
       });
 
-      // Update the chat's lastMessage preview
-      setChats((prev) =>
-        prev.map((c) => {
+      // Update the chat's lastMessage preview and bubble it to the top
+      setChats((prev) => {
+        const updated = prev.map((c) => {
           const roomId = c.isAi
             ? AI_ROOM
             : c.userId && currentUser?.id
@@ -132,8 +132,22 @@ const ChatPage = () => {
             : String(c.id);
           if (roomId !== msg.chatId) return c;
           return { ...c, lastMessage: msg.text, time: msg.timestamp };
-        })
-      );
+        });
+        // Keep AI chat pinned at index 0; sort the rest so the updated chat is first
+        const aiChats = updated.filter((c) => c.isAi);
+        const nonAi = updated.filter((c) => !c.isAi);
+        const idx = nonAi.findIndex((c) => {
+          const roomId = c.userId && currentUser?.id
+            ? [currentUser.id, c.userId].sort().join("--")
+            : String(c.id);
+          return roomId === msg.chatId;
+        });
+        if (idx > 0) {
+          const [moved] = nonAi.splice(idx, 1);
+          nonAi.unshift(moved);
+        }
+        return [...aiChats, ...nonAi];
+      });
     };
 
     /** Typing indicator — chatId is the room string. */
