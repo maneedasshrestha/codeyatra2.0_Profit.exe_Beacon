@@ -25,6 +25,7 @@ export function handleAddSubmit(
     sellerName: form.sellerName,
     condition: form.condition,
     location: form.location,
+    imageUrl: form.imageUrl,
   };
   setItems((prev) => [newItem, ...prev]);
   setNewlyListed((prev) => new Set([...prev, newItem.id]));

@@ -12,6 +12,7 @@ export interface MarketItem {
   sellerName: string;
   condition: Condition;
   location: string;
+  imageUrl?: string;
 }
 
 export interface AddItemForm {
@@ -21,4 +22,5 @@ export interface AddItemForm {
   sellerName: string;
   condition: Condition;
   location: string;
+  imageUrl?: string;
 }
