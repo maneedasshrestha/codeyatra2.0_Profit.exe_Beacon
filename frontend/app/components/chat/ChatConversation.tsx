@@ -161,9 +161,20 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
                             {chat.name}
                             {chat.isAi && <span className="ml-2 text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full uppercase tracking-wider">AI</span>}
                         </h3>
-                        <p className="text-[12px] font-semibold text-gray-400">
-                            {chat.online ? "Online now" : "Offline"}
-                        </p>
+                        {isTyping ? (
+                            <p className="text-[12px] font-semibold text-violet-500 flex items-center gap-1">
+                                typing
+                                <span className="flex gap-0.5 items-center">
+                                    <span className="w-1 h-1 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                    <span className="w-1 h-1 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                    <span className="w-1 h-1 bg-violet-400 rounded-full animate-bounce" />
+                                </span>
+                            </p>
+                        ) : (
+                            <p className="text-[12px] font-semibold text-gray-400">
+                                {chat.online ? "Online now" : "Offline"}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
