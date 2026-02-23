@@ -7,6 +7,7 @@ export const FILTERS = [
 
 export interface Post {
   id: number;
+  userId?: string;
   community: string;
   author: string;
   authorInitials: string;

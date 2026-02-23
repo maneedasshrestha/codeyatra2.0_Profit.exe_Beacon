@@ -296,6 +296,23 @@ export const searchUsers = async (req, res) => {
   return res.status(200).json({ users });
 };
 
+// ✨ 10b. GET USER PROFILE BY ID (public — any authenticated user can view)
+export const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  const { data, error } = await supabaseAdmin
+    .from("users")
+    .select("id, name, college, stream, semester, role, avatar_url")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  return res.status(200).json({ profile: data });
+};
+
 // ✨ 10. UPDATE PROFILE
 export const updateProfile = async (req, res) => {
   const supabase = createClient({ req, res });

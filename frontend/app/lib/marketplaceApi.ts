@@ -19,6 +19,7 @@ export interface ApiListing {
   image_url: string | null;
   college: string | null;
   created_at: string;
+  seller_name?: string | null;
 }
 
 export interface GetListingsParams {
@@ -96,6 +97,24 @@ export interface CreateListingPayload {
   condition?: string;
   college?: string;
   image?: File | null;
+}
+
+/** DELETE /api/marketplace/:id — remove a listing (only the owner can do this) */
+export async function deleteListing(
+  id: string,
+  token: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/marketplace/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error ?? `Delete listing failed: ${res.status}`);
+  }
 }
 
 /** POST /api/marketplace — create a new listing (requires auth) */

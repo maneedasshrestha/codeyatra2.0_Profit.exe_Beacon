@@ -2,13 +2,15 @@ import { AddItemForm, MarketItem, Role, Condition, Category } from "./types";
 import { genSeed } from "./mockData";
 import {
   createListing as apiCreateListing,
+  deleteListing as apiDeleteListing,
   ApiListing,
+  getAuthToken,
 } from "../../lib/marketplaceApi";
 
 /** Convert a backend ApiListing into the frontend MarketItem shape */
 export function apiListingToMarketItem(
   listing: ApiListing,
-  sellerName = "Unknown"
+  sellerName?: string
 ): MarketItem {
   return {
     id: listing.id,
@@ -19,7 +21,7 @@ export function apiListingToMarketItem(
     createdAt: listing.created_at
       ? new Date(listing.created_at).getTime()
       : Date.now(),
-    sellerName,
+    sellerName: sellerName ?? listing.seller_name ?? "Unknown",
     condition: (listing.condition as Condition) ?? "Good",
     location: listing.college ?? "",
     image_url: listing.image_url,
@@ -77,19 +79,30 @@ export async function handleAddSubmit(
   }
 }
 
-export function handleDelete(
+export async function handleDelete(
   id: string,
   setItems: React.Dispatch<React.SetStateAction<MarketItem[]>>,
   setNewlyListed: React.Dispatch<React.SetStateAction<Set<string>>>,
   setToast: (msg: string | null) => void
 ) {
-  setItems((prev) => prev.filter((it) => it.id !== id));
-  setNewlyListed((prev) => {
-    const s = new Set(prev);
-    s.delete(id);
-    return s;
-  });
-  showToast(setToast, "Item removed");
+  const token = getAuthToken();
+  if (!token) {
+    showToast(setToast, "You must be logged in to delete a listing");
+    return;
+  }
+  try {
+    await apiDeleteListing(id, token);
+    setItems((prev) => prev.filter((it) => it.id !== id));
+    setNewlyListed((prev) => {
+      const s = new Set(prev);
+      s.delete(id);
+      return s;
+    });
+    showToast(setToast, "Item removed");
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to delete listing";
+    showToast(setToast, msg);
+  }
 }
 
 export function handleRoleSwitch(
@@ -139,7 +152,8 @@ export function handleBuyConfirm(
   setPurchased: React.Dispatch<React.SetStateAction<MarketItem[]>>,
   setBuyOpen: React.Dispatch<React.SetStateAction<boolean>>,
   setBuyTarget: React.Dispatch<React.SetStateAction<MarketItem | null>>,
-  setToast: (msg: string | null) => void
+  setToast: (msg: string | null) => void,
+  sendOrderToSeller?: (sellerId: string, orderText: string) => void
 ) {
   if (!buyTarget) return;
   setItems((prev) => prev.filter((it) => it.id !== buyTarget.id));
@@ -156,6 +170,19 @@ export function handleBuyConfirm(
   setPurchased((prev) => [buyTarget, ...prev]);
   setBuyOpen(false);
   setBuyTarget(null);
+
+  // Send order message to seller's chat if seller ID is known
+  if (sendOrderToSeller && buyTarget.user_id) {
+    const orderNumber = String(Date.now());
+    const orderData = {
+      orderNumber,
+      productName: buyTarget.name,
+      productImage: buyTarget.image_url ?? null,
+      price: buyTarget.price,
+    };
+    sendOrderToSeller(buyTarget.user_id, `__ORDER__:${JSON.stringify(orderData)}`);
+  }
+
   showToast(setToast, "Request sent to seller!");
 }
 

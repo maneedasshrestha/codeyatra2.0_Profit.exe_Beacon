@@ -35,6 +35,16 @@ export interface SearchedUser {
   role?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  college: string;
+  stream: string;
+  semester: number;
+  role: string;
+  avatar_url?: string;
+}
+
 // ─── API calls ────────────────────────────────────────────────────────────────
 
 /**
@@ -115,5 +125,23 @@ export async function searchUsers(query: string): Promise<SearchedUser[]> {
     return data.users ?? [];
   } catch {
     return [];
+  }
+}
+
+/**
+ * Fetches a public user profile by their UUID.
+ * Calls GET /auth/users/:id
+ */
+export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
+  if (!userId) return null;
+  try {
+    const res = await fetch(`${API_BASE}/auth/users/${userId}`, {
+      headers: { "Content-Type": "application/json", ...authHeader() },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.profile ?? null;
+  } catch {
+    return null;
   }
 }

@@ -99,7 +99,57 @@ export const getAllListings = async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  return res.status(200).json({ listings: data });
+  // Enrich listings with seller names from the users table
+  const userIds = [...new Set((data || []).map((l) => l.user_id).filter(Boolean))];
+  let sellerMap = {};
+  if (userIds.length > 0) {
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, name")
+      .in("id", userIds);
+    (users || []).forEach((u) => { sellerMap[u.id] = u.name; });
+  }
+
+  const listings = (data || []).map((l) => ({
+    ...l,
+    seller_name: sellerMap[l.user_id] || null,
+  }));
+
+  return res.status(200).json({ listings });
+};
+
+// DELETE /api/marketplace/:id — only the listing owner can delete
+export const deleteListing = async (req, res) => {
+  const { id } = req.params;
+  const user_id = req.user?.id;
+
+  if (!user_id) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  // Fetch the listing first to verify ownership
+  const { data: listing, error: fetchError } = await supabase
+    .from("marketplace")
+    .select("id, user_id")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !listing) {
+    return res.status(404).json({ error: "Listing not found" });
+  }
+
+  if (listing.user_id !== user_id) {
+    return res.status(403).json({ error: "Forbidden: you can only delete your own listings" });
+  }
+
+  const { error: deleteError } = await supabase
+    .from("marketplace")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) return res.status(500).json({ error: deleteError.message });
+
+  return res.status(200).json({ message: "Listing deleted" });
 };
 
 // GET /api/marketplace/:id
@@ -130,5 +180,16 @@ export const getListingById = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  return res.status(200).json({ listing: data });
+  // Enrich with seller name
+  let seller_name = null;
+  if (data?.user_id) {
+    const { data: user } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", data.user_id)
+      .single();
+    seller_name = user?.name ?? null;
+  }
+
+  return res.status(200).json({ listing: { ...data, seller_name } });
 };
