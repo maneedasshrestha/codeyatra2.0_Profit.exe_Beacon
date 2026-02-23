@@ -23,21 +23,39 @@ const calculateScore = (resource) => {
 // Body (multipart/form-data): title, description, subject, semester, file_type, file
 // ─────────────────────────────────────────────
 export const uploadResource = async (req, res) => {
+  console.log("=== UPLOAD RESOURCE DEBUG ===");
+  console.log("Authorization header:", req.headers.authorization);
+  console.log("req.body:", req.body);
+  console.log("req.file:", req.file);
+  console.log("Has file:", !!req.file);
+
   const supabase = createClient({ req, res });
 
   const {
     data: { user },
     error: authError,
   } = await supabase.auth.getUser();
+
+  console.log("User:", user);
+  console.log("Auth error:", authError);
+
   if (authError || !user)
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "Unauthorized", details: authError });
 
   const { title, description, subject, semester, file_type } = req.body;
   const file = req.file;
 
+  console.log("Extracted values:");
+  console.log("- title:", title);
+  console.log("- subject:", subject);
+  console.log("- semester:", semester);
+  console.log("- file_type:", file_type);
+  console.log("- file:", file);
+
   if (!title || !subject || !semester || !file_type || !file) {
     return res.status(400).json({
       error: "title, subject, semester, file_type and file are all required",
+      received: { title, subject, semester, file_type, hasFile: !!file },
     });
   }
 
@@ -90,7 +108,7 @@ export const uploadResource = async (req, res) => {
       `
       *,
       uploader:users(id, email)
-    `
+    `,
     )
     .single();
 
@@ -122,18 +140,16 @@ export const getAllResources = async (req, res) => {
 
   const offset = (parseInt(page) - 1) * parseInt(limit);
 
-  let query = supabase
-    .from("resources")
-    .select(
-      `
+  let query = supabase.from("resources").select(
+    `
       *,
       uploader:users(id, email),
       linked_posts:post_resources(
-        post:posts(id, title)
+        post:posts(id, content)
       )
     `,
-      { count: "exact" }
-    );
+    { count: "exact" },
+  );
 
   // ── Filters ──
   if (type) query = query.eq("file_type", type);
@@ -141,7 +157,7 @@ export const getAllResources = async (req, res) => {
   if (semester) query = query.eq("semester", parseInt(semester));
   if (search) {
     query = query.or(
-      `title.ilike.%${search}%,description.ilike.%${search}%,subject.ilike.%${search}%`
+      `title.ilike.%${search}%,description.ilike.%${search}%,subject.ilike.%${search}%`,
     );
   }
 
@@ -207,9 +223,9 @@ export const getResourceById = async (req, res) => {
       *,
       uploader:users(id, email),
       linked_posts:post_resources(
-        post:posts(id, title, content, created_at)
+        post:posts(id, content, created_at)
       )
-    `
+    `,
     )
     .eq("id", id)
     .single();
