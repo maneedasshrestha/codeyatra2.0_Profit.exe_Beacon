@@ -17,6 +17,8 @@ interface ChatConversationProps {
     onTyping?: (isTyping: boolean) => void;
     /** True when the other user in this chat is typing. */
     isTyping?: boolean;
+    /** True while chat history is being loaded from the server. */
+    isMessagesLoading?: boolean;
     onBack: () => void;
 }
 
@@ -27,6 +29,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
     onSendMessage,
     onTyping,
     isTyping = false,
+    isMessagesLoading = false,
     onBack,
 }) => {
     const [messageText, setMessageText] = useState("");
@@ -41,7 +44,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
     // Scroll to bottom whenever messages or loading / typing state changes
     useEffect(() => {
         scrollToBottom();
-    }, [messages, isLoading, isTyping]);
+    }, [messages, isLoading, isTyping, isMessagesLoading]);
 
     const handleTextChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -183,7 +186,29 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar pb-32">
-                {messages.map((msg) => {
+                {isMessagesLoading ? (
+                    /* Skeleton loading bubbles */
+                    <div className="space-y-4 animate-pulse">
+                        <div className="flex justify-start">
+                            <div className="h-10 w-48 bg-gray-200 rounded-[1.5rem] rounded-tl-none" />
+                        </div>
+                        <div className="flex justify-end">
+                            <div className="h-10 w-36 bg-violet-200 rounded-[1.5rem] rounded-tr-none" />
+                        </div>
+                        <div className="flex justify-start">
+                            <div className="h-16 w-64 bg-gray-200 rounded-[1.5rem] rounded-tl-none" />
+                        </div>
+                        <div className="flex justify-end">
+                            <div className="h-10 w-52 bg-violet-200 rounded-[1.5rem] rounded-tr-none" />
+                        </div>
+                        <div className="flex justify-start">
+                            <div className="h-10 w-40 bg-gray-200 rounded-[1.5rem] rounded-tl-none" />
+                        </div>
+                        <div className="flex justify-end">
+                            <div className="h-10 w-28 bg-violet-200 rounded-[1.5rem] rounded-tr-none" />
+                        </div>
+                    </div>
+                ) : messages.map((msg) => {
                     const isOrder = msg.text.startsWith("__ORDER__:");
                     const orderData: { orderNumber: string; productName: string; productImage?: string | null; price: number } | null = isOrder
                         ? (() => { try { return JSON.parse(msg.text.slice("__ORDER__:".length)); } catch { return null; } })()
